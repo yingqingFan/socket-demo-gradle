@@ -30,7 +30,7 @@ public class SocketClient {
             socketClient.sendMessage(socket);
         }
         //检测重连
-        new ReconnectThread(socket).start();
+        new ReconnectThread(socket, ip, port).start();
     }
 
     protected static Socket initClient(String ip, int port){

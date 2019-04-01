@@ -9,8 +9,12 @@ import java.net.Socket;
 
 public class ReconnectThread extends Thread{
     private Socket socket;
-    public ReconnectThread(Socket socket) {
+    private String ip;
+    private int port;
+    public ReconnectThread(Socket socket,String ip, int port) {
         this.socket = socket;
+        this.ip = ip;
+        this.port = port;
     }
 
     @Override
@@ -46,16 +50,16 @@ public class ReconnectThread extends Thread{
                 if(printStream!=null) {
                     printStream.close();
                 }
-                reconnect();
+                reconnect(ip, port);
             }
         }else{
-            reconnect();
+            reconnect(ip, port);
         }
     }
 
-    public void reconnect(){
+    public void reconnect(String ip, int port){
         System.out.println("尝试重新连接...");
-        socket = SocketClient.initClient();
+        socket = SocketClient.initClient(ip, port);
         if(socket!=null){
             //接收消息
             SocketClient.receiveMessage(socket);
