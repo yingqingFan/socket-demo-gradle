@@ -11,6 +11,6 @@ public class ClientTest {
             return;
         }
         String clientId = args[0];
-        SocketClient.run(clientId);
+        SocketClient.run(clientId,"localhost", 9999);
     }
 }

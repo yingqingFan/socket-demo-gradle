@@ -19,10 +19,10 @@ public class SocketServer {
     protected static Map<String, String> clientSocketMap = new HashMap<>();
     protected static Map<String, String> socketClientMap = new HashMap<>();
     protected static List<MessageInfo> messageHistoryList = new ArrayList<>();
-    public static void run() throws IOException {
+    public static void run(int port) throws IOException {
         SocketServer socketServer = new SocketServer();
         //创建一个通信类的对象
-        ServerSocket server = new ServerSocket(9999);
+        ServerSocket server = new ServerSocket(port);
         //输出当前服务器的端口号
         System.out.println("服务器创建成功，端口号：" + server.getLocalPort());
         //容纳三个线程的线程池

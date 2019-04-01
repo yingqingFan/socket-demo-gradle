@@ -15,14 +15,14 @@ public class SocketClient {
     public static String FRIEND_ClIENTID = null;
     public static String clientId = null;
 
-    public static void run(String clientId){
+    public static void run(String clientId, String ip, int port){
         if(StringUtils.isEmpty(clientId)){
             System.out.println("必须指定客户端Id");
             return;
         }
         SocketClient socketClient = new SocketClient();
         socketClient.clientId = clientId;
-        Socket socket = socketClient.initClient();
+        Socket socket = socketClient.initClient(ip, port);
         if(socket!=null){
             //接收消息
             socketClient.receiveMessage(socket);
@@ -33,12 +33,12 @@ public class SocketClient {
         new ReconnectThread(socket).start();
     }
 
-    protected static Socket initClient(){
+    protected static Socket initClient(String ip, int port){
         Socket socket = null;
         PrintStream printStream = null;
         try {
             //客户端请求与服务器连接
-            socket = new Socket( "localhost", 9999);
+            socket = new Socket( ip, port);
             //获取Socket的输出流，用来发送数据到服务端
             printStream = new PrintStream(socket.getOutputStream());
             //绑定客户端信息
