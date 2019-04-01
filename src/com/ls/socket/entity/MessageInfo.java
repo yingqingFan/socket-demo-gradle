@@ -1,4 +1,4 @@
-package Entity;
+package com.ls.socket.entity;
 
 import java.io.Serializable;
 import java.util.Date;
