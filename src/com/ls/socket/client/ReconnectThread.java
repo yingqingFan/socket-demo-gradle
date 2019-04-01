@@ -22,7 +22,6 @@ public class ReconnectThread extends Thread{
                 e.printStackTrace();
             }
             sendHeartBeat();
-            System.out.println("################");
         }
 
     }
