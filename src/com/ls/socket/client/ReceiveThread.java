@@ -1,5 +1,9 @@
 package com.ls.socket.client;
 
+import com.google.gson.Gson;
+import com.ls.socket.entity.MessageInfo;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,7 +23,16 @@ public class ReceiveThread extends Thread{
                 bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String line = null;
                 while (((line = bufferedReader.readLine()) != null)) {
-                    System.out.println(line);
+                    MessageInfo messageInfo = new Gson().fromJson(line, MessageInfo.class);
+                    if(messageInfo.getAction()!=null && messageInfo.getAction().equals(SocketClient.ACTIONS[0])){
+                        if(StringUtils.isEmpty(SocketClient.FRIEND_ClIENTID)){
+                            System.out.println(messageInfo.getMessageContent());
+                        }else if(messageInfo.getClientId().equals(SocketClient.FRIEND_ClIENTID)){
+                            System.out.println(messageInfo.getMessageContent());
+                        }
+                    }else {
+                        System.out.println(messageInfo.getMessageContent());
+                    }
                 }
             }
         } catch (IOException e) {

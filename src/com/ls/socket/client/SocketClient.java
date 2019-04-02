@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class SocketClient {
-    public static final String[] ACTIONS = new String[]{"send message", "view history", "view online clients", "bind", "heartbeat"};
+    public static final String[] ACTIONS = new String[]{"send message", "view history", "view online clients", "bind", "heartbeat", "init send"};
     public static String ACTION = null;
     public static String FRIEND_ClIENTID = null;
     public static String clientId = null;
@@ -78,33 +78,25 @@ public class SocketClient {
         new SendThread(socket).start();
     }
 
-
     protected static MessageInfo initMessageInfo(){
         MessageInfo messageInfo = new MessageInfo();
         Scanner scanner = new Scanner(System.in);
         if(ACTION != null && ACTION != ACTIONS[2]){
             messageInfo.setAction(ACTION);
             if(ACTION.equals(ACTIONS[0])){
-                if(FRIEND_ClIENTID != null){
-                    messageInfo = completeSendMessageInfoById(FRIEND_ClIENTID,messageInfo);
-                }else{
-                    System.out.print("请输入好友clientId:");
-                    String friendClientId = scanner.next();
-                    messageInfo = completeSendMessageInfoById(friendClientId,messageInfo);
-                }
+                messageInfo = completeSendMessageInfoById(FRIEND_ClIENTID,messageInfo);
             }else if(ACTION.equals(ACTIONS[1])){
                 messageInfo = completeHistoryMessageInfo(messageInfo);
             }
         }else {
-            System.out.println("请选择操作序号：0." + ACTIONS[0] + " 1." + ACTIONS[1] + " 2." + ACTIONS[2]);
+            System.out.println("选择序号：0." + ACTIONS[0] + " 1." + ACTIONS[1] + " 2." + ACTIONS[2]);
             String orderNumber = scanner.next();
             switch (orderNumber) {
                 case "0":
                     ACTION = ACTIONS[0];
-                    messageInfo.setAction(ACTION);
-                    System.out.print("请输入好友clientId:");
+                    System.out.print("请输入好友clientId(按Enter键发送消息,按#键和Enter退出聊天):");
                     String friendClientId = scanner.next();
-                    messageInfo = completeSendMessageInfoById(friendClientId, messageInfo);
+                    messageInfo = initSend(friendClientId, messageInfo);
                     break;
                 case "1":
                     ACTION = ACTIONS[1];
@@ -123,10 +115,17 @@ public class SocketClient {
         return messageInfo;
     }
 
+    //初始化发送消息（发送前显示历史消息）
+    protected static MessageInfo initSend(String friendId, MessageInfo messageInfo){
+        FRIEND_ClIENTID = friendId;
+        messageInfo.setFriendClientId(FRIEND_ClIENTID);
+        messageInfo.setAction(ACTIONS[5]);
+        return messageInfo;
+    }
+
     protected static MessageInfo completeSendMessageInfoById(String friendId, MessageInfo messageInfo){
         FRIEND_ClIENTID = friendId;
         messageInfo.setFriendClientId(FRIEND_ClIENTID);
-        System.out.println("To client" + FRIEND_ClIENTID + "(按Enter键发送消息,按#键和Enter退出聊天):");
         Scanner scanner = new Scanner(System.in);
         String messageContent = scanner.next();
         if (messageContent.equals("#")) {
@@ -138,7 +137,7 @@ public class SocketClient {
     }
 
     protected static MessageInfo completeHistoryMessageInfo(MessageInfo messageInfo){
-        System.out.println("你想查询和谁之间的历史记录，请输入对方clientId(按#键加Enter键退出历史查询)：");
+        System.out.println("请输入对方clientId(按#键加Enter键退出历史查询)：");
         Scanner scanner = new Scanner(System.in);
         String friendClientId = scanner.next();
         if (friendClientId.equals("#")) {
