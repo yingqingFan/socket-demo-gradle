@@ -2,12 +2,14 @@ package com.ls.socket.client;
 
 import com.google.gson.Gson;
 import com.ls.socket.entity.MessageInfo;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 
 public class ReconnectThread extends Thread{
+    private static Logger log = Logger.getLogger(ReconnectThread.class);
     private Socket socket;
     private String ip;
     private int port;
@@ -23,7 +25,7 @@ public class ReconnectThread extends Thread{
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
             sendHeartBeat();
         }
@@ -45,7 +47,7 @@ public class ReconnectThread extends Thread{
                 try {
                     socket.close();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                   log.error(e1.getMessage());
                 }
                 if(printStream!=null) {
                     printStream.close();

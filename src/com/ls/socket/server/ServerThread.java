@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.ls.socket.client.SocketClient;
 import com.ls.socket.entity.MessageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 public class ServerThread extends Thread {
+    private static Logger log = Logger.getLogger(ServerThread.class);
     Gson gson = new Gson();
     public static String lineSeparator = System.getProperty("line.separator");
     private PrintWriter writer;//输出流
@@ -30,7 +32,6 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
-        System.out.println("thread socketId:"+Thread.currentThread().getId());
         //客户端连接后获取socket输出输入流
         try {
             writer = new PrintWriter(socket.getOutputStream());
@@ -38,7 +39,7 @@ public class ServerThread extends Thread {
             //读取客户端信息并转发
             readAndSend();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
@@ -60,7 +61,7 @@ public class ServerThread extends Thread {
                 printWriter1.flush();
             }
         }catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
@@ -80,7 +81,6 @@ public class ServerThread extends Thread {
         try {
             while (true) {
                 while (((line = bufferedReader.readLine()) != null)) {
-                    System.out.println("内容 :" + line);
                     MessageInfo messageInfo = gson.fromJson(line, MessageInfo.class);
                     //如果是绑定信息
                     if(messageInfo.getAction().equals(SocketClient.ACTIONS[3])){

@@ -2,12 +2,14 @@ package com.ls.socket.client;
 
 import com.google.gson.Gson;
 import com.ls.socket.entity.MessageInfo;
+import org.apache.log4j.Logger;
 
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Date;
 
 public class SendThread extends Thread{
+    private static Logger log = Logger.getLogger(SendThread.class);
     private Socket socket;
     public SendThread(Socket socket) {
         this.socket = socket;

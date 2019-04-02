@@ -3,6 +3,7 @@ package com.ls.socket.client;
 import com.google.gson.Gson;
 import com.ls.socket.entity.MessageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -14,10 +15,11 @@ public class SocketClient {
     public static String ACTION = null;
     public static String FRIEND_ClIENTID = null;
     public static String clientId = null;
-
+    private static Logger log = Logger.getLogger(SocketClient.class);
     public static void run(String clientId, String ip, int port){
         if(StringUtils.isEmpty(clientId)){
             System.out.println("必须指定客户端Id");
+            log.error("必须指定客户端Id");
             return;
         }
         SocketClient socketClient = new SocketClient();
@@ -38,7 +40,9 @@ public class SocketClient {
         PrintStream printStream = null;
         try {
             //客户端请求与服务器连接
+            log.debug("客户端连接中...");
             socket = new Socket( ip, port);
+            log.debug("客户端已连接");
             //获取Socket的输出流，用来发送数据到服务端
             printStream = new PrintStream(socket.getOutputStream());
             //绑定客户端信息
@@ -48,13 +52,13 @@ public class SocketClient {
                 try {
                     socket.close();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    log.error(e1.getMessage());
                 }
             }
             if(printStream !=null){
                 printStream.close();
             }
-            System.out.println("服务器未连接");
+            log.debug("服务器未连接");
         }
         return socket;
     }

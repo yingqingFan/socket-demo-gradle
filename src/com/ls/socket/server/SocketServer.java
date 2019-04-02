@@ -2,6 +2,7 @@ package com.ls.socket.server;
 
 import com.ls.socket.entity.MessageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,6 +15,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class SocketServer {
+    private static Logger log = Logger.getLogger(SocketServer.class);
     //key-value:socketId-socket
     protected static Map<String, Socket> socketMap = new HashMap<>();
     protected static Map<String, String> clientSocketMap = new HashMap<>();
@@ -24,7 +26,7 @@ public class SocketServer {
         //创建一个通信类的对象
         ServerSocket server = new ServerSocket(port);
         //输出当前服务器的端口号
-        System.out.println("服务器创建成功，端口号：" + server.getLocalPort());
+        log.debug("服务器创建成功，端口号：" + server.getLocalPort());
         //容纳三个线程的线程池
         Executor pool = Executors.newFixedThreadPool(100);
         boolean flag = true;
