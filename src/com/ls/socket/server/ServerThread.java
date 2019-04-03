@@ -113,8 +113,8 @@ public class ServerThread extends Thread {
             String clientId = SocketServer.socketClientMap.get(socketId);
             SocketServer.socketClientMap.remove(socketId);
             SocketServer.clientSocketMap.remove(clientId);
-            String outS = "client" + clientId + " 已下线";
-            System.out.println("client" + clientId + " 断开连接");
+            String outS = "用户：" + clientId + " 已下线";
+            System.out.println("用户：" + clientId + " 断开连接");
             MessageInfo messageInfo = new MessageInfo();
             messageInfo.setMessageContent(outS);
             outOthers(new Gson().toJson(messageInfo));
@@ -128,7 +128,7 @@ public class ServerThread extends Thread {
             SocketServer.socketClientMap.put(socketId, clientId);
             SocketServer.clientSocketMap.put(clientId, socketId);
             //客户端上线成功提示
-            String successMessage = "当前client" + clientId + " 上线成功";
+            String successMessage = "当前用户：" + clientId + " 上线成功";
             messageInfo.setMessageContent(successMessage);
             String successInfo = new Gson().toJson(messageInfo);
             out(successInfo, socketId);
@@ -170,7 +170,7 @@ public class ServerThread extends Thread {
         out(new Gson().toJson(messageInfo), SocketServer.clientSocketMap.get(clientIdTo));
         //将messageInfo存入本地文件
         messageInfo.setMessageContent(message);
-        new DataUtil<MessageInfo>().writeToFile(SocketUtil.DATA_FILE_PATH,messageInfo);
+        new DataUtil<MessageInfo>().writeToFile(SocketServer.DATA_FILE_PATH,messageInfo);
     }
 
     public void outHistoryToClient(MessageInfo messageInfo){
@@ -209,7 +209,7 @@ public class ServerThread extends Thread {
 
     //将历史记录按时间排序
     public List<MessageInfo> sortHistoryByTime(){
-        List<MessageInfo> messageHistoryList = new DataUtil<MessageInfo>().readFromFile(SocketUtil.DATA_FILE_PATH,MessageInfo.class);
+        List<MessageInfo> messageHistoryList = new DataUtil<MessageInfo>().readFromFile(SocketServer.DATA_FILE_PATH,MessageInfo.class);
         if(messageHistoryList.size()>0) {
             Collections.sort(messageHistoryList, new Comparator<MessageInfo>() {
                 @Override

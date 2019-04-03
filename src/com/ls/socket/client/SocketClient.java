@@ -18,9 +18,9 @@ public class SocketClient {
     private static Logger log = Logger.getLogger(SocketClient.class);
     public static void run(String clientId, String ip, int port){
         if(StringUtils.isEmpty(clientId)){
-            System.out.println("必须指定客户端Id");
-            log.error("必须指定客户端Id");
-            return;
+            System.out.println("必须指定用户名");
+            log.error("必须指定用户名");
+            System.exit(0);
         }
         SocketClient socketClient = new SocketClient();
         socketClient.CLIENT_ID = clientId;
@@ -91,7 +91,12 @@ public class SocketClient {
             if(ACTION.equals(SocketUtil.ACTIONS[0])){
                 messageInfo = completeSendMessageInfoById(FRIEND_CLIENT_ID,messageInfo);
             }else if(ACTION.equals(SocketUtil.ACTIONS[1])){
-                messageInfo = completeHistoryMessageInfo(messageInfo);
+                String printStr = "";
+                while (!printStr.equals("#")) {
+                    printStr = scanner.next();
+                }
+                ACTION = null;
+                messageInfo = null;
             }else if(ACTION.equals(SocketUtil.ACTIONS[2])){
                 String printStr = "";
                 while (!printStr.equals("#")) {
@@ -106,14 +111,14 @@ public class SocketClient {
             switch (orderNumber) {
                 case "0":
                     ACTION = SocketUtil.ACTIONS[0];
-                    System.out.println("请输入好友clientId(按Enter键发送消息,按#键加Enter退出聊天):");
+                    System.out.println("请输入好友用户名(按Enter键发送消息,按#键加Enter退出聊天):");
                     String friendClientId = scanner.next();
                     messageInfo = initSend(friendClientId, messageInfo);
                     break;
                 case "1":
-                    ACTION = SocketUtil.ACTIONS[1];
-                    messageInfo.setAction(ACTION);
-                    messageInfo = completeHistoryMessageInfo(messageInfo);
+                    System.out.println("请输入对方用户名(按#键加Enter键退出历史查询)：");
+                    String friendId = scanner.next();
+                    messageInfo = completeHistoryMessageInfo(friendId, messageInfo);
                     break;
                 case "2":
                     messageInfo.setAction(SocketUtil.ACTIONS[2]);
@@ -149,15 +154,11 @@ public class SocketClient {
         return messageInfo;
     }
 
-    protected static MessageInfo completeHistoryMessageInfo(MessageInfo messageInfo){
-        System.out.println("请输入对方clientId(按#键加Enter键退出历史查询)：");
-        Scanner scanner = new Scanner(System.in);
-        String friendClientId = scanner.next();
-        if (friendClientId.equals("#")) {
-            ACTION = null;
-            return null;
-        }
-        messageInfo.setFriendClientId(friendClientId);
+    protected static MessageInfo completeHistoryMessageInfo(String friendId, MessageInfo messageInfo){
+        ACTION = SocketUtil.ACTIONS[1];
+        FRIEND_CLIENT_ID = friendId;
+        messageInfo.setAction(ACTION);
+        messageInfo.setFriendClientId(friendId);
         return messageInfo;
     }
 }

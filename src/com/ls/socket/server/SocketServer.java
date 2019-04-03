@@ -16,7 +16,13 @@ public class SocketServer {
     protected static Map<String, Socket> socketMap = new HashMap<>();
     protected static Map<String, String> clientSocketMap = new HashMap<>();
     protected static Map<String, String> socketClientMap = new HashMap<>();
-    public static void run(int port) throws IOException {
+    protected static String DATA_FILE_PATH = null;
+    public static void run(int port, String dataPath) throws IOException {
+        if(StringUtils.isEmpty(dataPath)){
+            log.error("必须指定数据存储位置(文件名默认为：messageInfo.txt)");
+            System.exit(0);
+        }
+        DATA_FILE_PATH = dataPath+"/messageInfo.txt";
         SocketServer socketServer = new SocketServer();
         //创建一个通信类的对象
         ServerSocket server = new ServerSocket(port);
