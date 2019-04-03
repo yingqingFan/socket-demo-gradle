@@ -2,10 +2,11 @@ package com.ls.socket.client;
 
 import com.google.gson.Gson;
 import com.ls.socket.entity.MessageInfo;
+import com.ls.socket.util.SocketUtil;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class HeartBeatThread extends Thread{
@@ -34,24 +35,20 @@ public class HeartBeatThread extends Thread{
     }
 
     public void sendHeartBeat(){
-        PrintStream printStream = null;
+        PrintWriter writer = null;
         if(socket != null){
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setClientId(SocketClient.CLIENT_ID);
+            messageInfo.setAction(SocketUtil.ACTIONS[4]);
+            messageInfo.setMessageContent("心跳");
             try {
-                printStream = new PrintStream(socket.getOutputStream());
-                MessageInfo messageInfo = new MessageInfo();
-                messageInfo.setClientId(SocketClient.CLIENT_ID);
-                messageInfo.setAction(SocketClient.ACTIONS[4]);
-                messageInfo.setMessageContent("心跳");
-                printStream.println(new Gson().toJson(messageInfo));
-                printStream.flush();
+                writer = new PrintWriter(socket.getOutputStream());
+                writer.println(new Gson().toJson(messageInfo));
+                writer.flush();
             } catch (IOException e) {
-                try {
-                    socket.close();
-                } catch (IOException e1) {
-                   log.error(e1.getMessage());
-                }
-                if(printStream!=null) {
-                    printStream.close();
+                log.error("error",e);
+                if(writer != null){
+                    writer.close();
                 }
                 reconnect(ip, port);
             }

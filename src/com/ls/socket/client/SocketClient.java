@@ -2,16 +2,16 @@ package com.ls.socket.client;
 
 import com.google.gson.Gson;
 import com.ls.socket.entity.MessageInfo;
+import com.ls.socket.util.SocketUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class SocketClient {
-    public static final String[] ACTIONS = new String[]{"send message", "view history", "view online clients", "bind", "heartbeat", "init send"};
     public static String ACTION = null;
     public static String FRIEND_CLIENT_ID = null;
     public static String CLIENT_ID = null;
@@ -37,16 +37,16 @@ public class SocketClient {
 
     protected static Socket initClient(String ip, int port){
         Socket socket = null;
-        PrintStream printStream = null;
+        PrintWriter writer = null;
         try {
             //客户端请求与服务器连接
             log.debug("客户端连接中...");
             socket = new Socket( ip, port);
             log.debug("客户端已连接");
             //获取Socket的输出流，用来发送数据到服务端
-            printStream = new PrintStream(socket.getOutputStream());
+            writer = new PrintWriter(socket.getOutputStream());
             //绑定客户端信息
-            bindInfoWithServer(CLIENT_ID, printStream);
+            bindInfoWithServer(CLIENT_ID, writer);
         }catch (IOException e){
             if(socket != null){
                 try {
@@ -55,8 +55,8 @@ public class SocketClient {
                     log.error(e1.getMessage());
                 }
             }
-            if(printStream !=null){
-                printStream.close();
+            if(writer != null) {
+                writer.close();
             }
             log.debug("服务器未连接");
         }
@@ -64,12 +64,13 @@ public class SocketClient {
     }
 
     //绑定clientId
-    protected static void bindInfoWithServer(String clientId, PrintStream out){
+    protected static void bindInfoWithServer(String clientId, PrintWriter writer){
         MessageInfo messageInfo = new MessageInfo();
-        messageInfo.setAction(ACTIONS[3]);
+        messageInfo.setAction(SocketUtil.ACTIONS[3]);
         //将clientId发送到服务端
         messageInfo.setClientId(clientId);
-        out.println(new Gson().toJson(messageInfo));
+        writer.println(new Gson().toJson(messageInfo));
+        writer.flush();
     }
 
     //开启线程接收信息
@@ -85,30 +86,38 @@ public class SocketClient {
     protected static MessageInfo initMessageInfo(){
         MessageInfo messageInfo = new MessageInfo();
         Scanner scanner = new Scanner(System.in);
-        if(ACTION != null && ACTION != ACTIONS[2]){
+        if(ACTION != null){
             messageInfo.setAction(ACTION);
-            if(ACTION.equals(ACTIONS[0])){
+            if(ACTION.equals(SocketUtil.ACTIONS[0])){
                 messageInfo = completeSendMessageInfoById(FRIEND_CLIENT_ID,messageInfo);
-            }else if(ACTION.equals(ACTIONS[1])){
+            }else if(ACTION.equals(SocketUtil.ACTIONS[1])){
                 messageInfo = completeHistoryMessageInfo(messageInfo);
+            }else if(ACTION.equals(SocketUtil.ACTIONS[2])){
+                String printStr = "";
+                while (!printStr.equals("#")) {
+                    printStr = scanner.next();
+                }
+                ACTION = null;
+                messageInfo = null;
             }
         }else {
-            System.out.println("选择序号：0." + ACTIONS[0] + " 1." + ACTIONS[1] + " 2." + ACTIONS[2]);
+            System.out.println("选择序号：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2]);
             String orderNumber = scanner.next();
             switch (orderNumber) {
                 case "0":
-                    ACTION = ACTIONS[0];
-                    System.out.print("请输入好友clientId(按Enter键发送消息,按#键和Enter退出聊天):");
+                    ACTION = SocketUtil.ACTIONS[0];
+                    System.out.println("请输入好友clientId(按Enter键发送消息,按#键加Enter退出聊天):");
                     String friendClientId = scanner.next();
                     messageInfo = initSend(friendClientId, messageInfo);
                     break;
                 case "1":
-                    ACTION = ACTIONS[1];
+                    ACTION = SocketUtil.ACTIONS[1];
                     messageInfo.setAction(ACTION);
                     messageInfo = completeHistoryMessageInfo(messageInfo);
                     break;
                 case "2":
-                    messageInfo.setAction(ACTIONS[2]);
+                    messageInfo.setAction(SocketUtil.ACTIONS[2]);
+                    ACTION = SocketUtil.ACTIONS[2];
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
@@ -123,7 +132,7 @@ public class SocketClient {
     protected static MessageInfo initSend(String friendId, MessageInfo messageInfo){
         FRIEND_CLIENT_ID = friendId;
         messageInfo.setFriendClientId(FRIEND_CLIENT_ID);
-        messageInfo.setAction(ACTIONS[5]);
+        messageInfo.setAction(SocketUtil.ACTIONS[5]);
         return messageInfo;
     }
 
