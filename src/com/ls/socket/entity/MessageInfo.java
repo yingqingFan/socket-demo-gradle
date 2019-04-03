@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class MessageInfo implements Serializable {
+    private static final long serialVersionUID = 3116836935624567198L;
     private String messageId;
     private String action;
     private String clientId;

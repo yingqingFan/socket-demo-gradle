@@ -1,26 +1,21 @@
 package com.ls.socket.server;
 
-import com.ls.socket.entity.MessageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class SocketServer {
     private static Logger log = Logger.getLogger(SocketServer.class);
-    //key-value:socketId-socket
     protected static Map<String, Socket> socketMap = new HashMap<>();
     protected static Map<String, String> clientSocketMap = new HashMap<>();
     protected static Map<String, String> socketClientMap = new HashMap<>();
-    protected static List<MessageInfo> messageHistoryList = new ArrayList<>();
     public static void run(int port) throws IOException {
         SocketServer socketServer = new SocketServer();
         //创建一个通信类的对象

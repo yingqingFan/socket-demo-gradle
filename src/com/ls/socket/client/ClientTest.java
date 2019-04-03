@@ -9,7 +9,6 @@ public class ClientTest {
     private static Logger log = Logger.getLogger(ClientTest.class);
     public static void main(String[] args) throws IOException {
         if(ArrayUtils.isEmpty(args)){
-            System.out.println("必须指定客户端Id");
             log.error("必须指定客户端Id");
             return;
         }

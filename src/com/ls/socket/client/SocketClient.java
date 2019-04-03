@@ -13,8 +13,8 @@ import java.util.Scanner;
 public class SocketClient {
     public static final String[] ACTIONS = new String[]{"send message", "view history", "view online clients", "bind", "heartbeat", "init send"};
     public static String ACTION = null;
-    public static String FRIEND_ClIENTID = null;
-    public static String clientId = null;
+    public static String FRIEND_CLIENT_ID = null;
+    public static String CLIENT_ID = null;
     private static Logger log = Logger.getLogger(SocketClient.class);
     public static void run(String clientId, String ip, int port){
         if(StringUtils.isEmpty(clientId)){
@@ -23,7 +23,7 @@ public class SocketClient {
             return;
         }
         SocketClient socketClient = new SocketClient();
-        socketClient.clientId = clientId;
+        socketClient.CLIENT_ID = clientId;
         Socket socket = socketClient.initClient(ip, port);
         if(socket!=null){
             //接收消息
@@ -32,7 +32,7 @@ public class SocketClient {
             socketClient.sendMessage(socket);
         }
         //检测重连
-        new ReconnectThread(socket, ip, port).start();
+        new HeartBeatThread(socket, ip, port).start();
     }
 
     protected static Socket initClient(String ip, int port){
@@ -46,7 +46,7 @@ public class SocketClient {
             //获取Socket的输出流，用来发送数据到服务端
             printStream = new PrintStream(socket.getOutputStream());
             //绑定客户端信息
-            bindInfoWithServer(clientId, printStream);
+            bindInfoWithServer(CLIENT_ID, printStream);
         }catch (IOException e){
             if(socket != null){
                 try {
@@ -88,7 +88,7 @@ public class SocketClient {
         if(ACTION != null && ACTION != ACTIONS[2]){
             messageInfo.setAction(ACTION);
             if(ACTION.equals(ACTIONS[0])){
-                messageInfo = completeSendMessageInfoById(FRIEND_ClIENTID,messageInfo);
+                messageInfo = completeSendMessageInfoById(FRIEND_CLIENT_ID,messageInfo);
             }else if(ACTION.equals(ACTIONS[1])){
                 messageInfo = completeHistoryMessageInfo(messageInfo);
             }
@@ -121,15 +121,15 @@ public class SocketClient {
 
     //初始化发送消息（发送前显示历史消息）
     protected static MessageInfo initSend(String friendId, MessageInfo messageInfo){
-        FRIEND_ClIENTID = friendId;
-        messageInfo.setFriendClientId(FRIEND_ClIENTID);
+        FRIEND_CLIENT_ID = friendId;
+        messageInfo.setFriendClientId(FRIEND_CLIENT_ID);
         messageInfo.setAction(ACTIONS[5]);
         return messageInfo;
     }
 
     protected static MessageInfo completeSendMessageInfoById(String friendId, MessageInfo messageInfo){
-        FRIEND_ClIENTID = friendId;
-        messageInfo.setFriendClientId(FRIEND_ClIENTID);
+        FRIEND_CLIENT_ID = friendId;
+        messageInfo.setFriendClientId(FRIEND_CLIENT_ID);
         Scanner scanner = new Scanner(System.in);
         String messageContent = scanner.next();
         if (messageContent.equals("#")) {

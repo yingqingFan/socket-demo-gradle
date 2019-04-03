@@ -27,9 +27,9 @@ public class ReceiveThread extends Thread{
                 while (((line = bufferedReader.readLine()) != null)) {
                     MessageInfo messageInfo = new Gson().fromJson(line, MessageInfo.class);
                     if(messageInfo.getAction()!=null && messageInfo.getAction().equals(SocketClient.ACTIONS[0])){
-                        if(StringUtils.isEmpty(SocketClient.FRIEND_ClIENTID)){
+                        if(StringUtils.isEmpty(SocketClient.FRIEND_CLIENT_ID)){
                             System.out.println(messageInfo.getMessageContent());
-                        }else if(messageInfo.getClientId().equals(SocketClient.FRIEND_ClIENTID)){
+                        }else if(messageInfo.getClientId().equals(SocketClient.FRIEND_CLIENT_ID)){
                             System.out.println(messageInfo.getMessageContent());
                         }
                     }else {
