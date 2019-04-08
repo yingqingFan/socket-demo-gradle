@@ -1,5 +1,9 @@
 package com.ls.socket.server;
 
+import com.ls.socket.service.MessageInfoService;
+import com.ls.socket.service.RoomUserService;
+import com.ls.socket.service.UserService;
+import com.ls.socket.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -16,13 +20,12 @@ public class SocketServer {
     protected static Map<String, Socket> socketMap = new HashMap<>();
     protected static Map<String, String> clientSocketMap = new HashMap<>();
     protected static Map<String, String> socketClientMap = new HashMap<>();
-    protected static String DATA_FILE_PATH = null;
     public static void run(int port, String dataPath) throws IOException {
         if(StringUtils.isEmpty(dataPath)){
-            log.error("必须指定数据存储位置(文件名默认为：messageInfo.txt)");
+            log.error("必须指定数据存储位置");
             System.exit(0);
         }
-        DATA_FILE_PATH = dataPath+"/messageInfo.txt";
+        initDataFile(dataPath);
         SocketServer socketServer = new SocketServer();
         //创建一个通信类的对象
         ServerSocket server = new ServerSocket(port);
@@ -45,5 +48,16 @@ public class SocketServer {
 //            pool.execute(socketServer.new ServerThread(socket, socketId));
             new ServerThread(socket, socketId+"").start();
         }
+    }
+
+    protected static void initDataFile(String dataPath){
+        MessageInfoService.MESSAGE_FILE_PATH = dataPath + "/messageInfo.txt";
+        RoomUserService.ROOM_FILE_PATH = dataPath + "/room.txt";
+        RoomUserService.ROOM_USER_FILE_PATH = dataPath + "/roomUser.txt";
+        UserService.USER_FILE_PATH = dataPath + "/user.txt";
+        FileUtil.createFileIfNotExist(MessageInfoService.MESSAGE_FILE_PATH);
+        FileUtil.createFileIfNotExist(RoomUserService.ROOM_FILE_PATH);
+        FileUtil.createFileIfNotExist(RoomUserService.ROOM_USER_FILE_PATH);
+        FileUtil.createFileIfNotExist(UserService.USER_FILE_PATH);
     }
 }

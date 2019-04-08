@@ -8,7 +8,7 @@ public class MessageInfo implements Serializable {
     private String messageId;
     private String action;
     private String clientId;
-    private String friendClientId;
+    private String roomId;
     private String messageContent;
     private Date date;
 
@@ -36,12 +36,12 @@ public class MessageInfo implements Serializable {
         this.clientId = clientId;
     }
 
-    public String getFriendClientId() {
-        return friendClientId;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setFriendClientId(String friendClientId) {
-        this.friendClientId = friendClientId;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public String getMessageContent() {
