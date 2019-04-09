@@ -18,8 +18,8 @@ import java.util.concurrent.Executors;
 public class SocketServer {
     private static Logger log = Logger.getLogger(SocketServer.class);
     protected static Map<String, Socket> socketMap = new HashMap<>();
-    protected static Map<String, String> clientSocketMap = new HashMap<>();
-    protected static Map<String, String> socketClientMap = new HashMap<>();
+    protected static Map<String, String> userSocketMap = new HashMap<>();
+    protected static Map<String, String> socketUserMap = new HashMap<>();
     public static void run(int port, String dataPath) throws IOException {
         if(StringUtils.isEmpty(dataPath)){
             log.error("必须指定数据存储位置");

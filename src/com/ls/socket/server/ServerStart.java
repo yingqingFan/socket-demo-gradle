@@ -5,8 +5,8 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
-public class ServerTest {
-    private static Logger log = Logger.getLogger(ServerTest.class);
+public class ServerStart {
+    private static Logger log = Logger.getLogger(ServerStart.class);
     public static void main(String[] args) throws IOException {
         if(ArrayUtils.isEmpty(args)){
             log.error("必须指定数据存储位置(文件名默认为：messageInfo.txt)");

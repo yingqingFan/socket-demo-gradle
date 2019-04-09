@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class SocketClient {
     public static String ACTION = null;
     public static String ROOM_ID = null;
-    public static String CLIENT_ID = null;
+    public static String USER_ID = null;
     public static String USER_EXIST = null;
     private static Logger log = Logger.getLogger(SocketClient.class);
     public static void run(String userId, String dataPath, String ip, int port){
@@ -27,7 +27,7 @@ public class SocketClient {
             System.exit(0);
         }
         SocketClient socketClient = new SocketClient();
-        socketClient.CLIENT_ID = userId;
+        socketClient.USER_ID = userId;
         initDataFile(dataPath);
         Socket socket = socketClient.initClient(ip, port);
         if(socket!=null){
@@ -51,7 +51,7 @@ public class SocketClient {
             //获取Socket的输出流，用来发送数据到服务端
             writer = new PrintWriter(socket.getOutputStream());
             //绑定客户端信息
-            bindInfoWithServer(CLIENT_ID, writer);
+            bindInfoWithServer(USER_ID, writer);
         }catch (IOException e){
             if(socket != null){
                 try {
@@ -68,12 +68,12 @@ public class SocketClient {
         return socket;
     }
 
-    //绑定clientId
-    protected static void bindInfoWithServer(String clientId, PrintWriter writer){
+    //绑定userId
+    protected static void bindInfoWithServer(String userId, PrintWriter writer){
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setAction(SocketUtil.ACTIONS[3]);
-        //将clientId发送到服务端
-        messageInfo.setClientId(clientId);
+        //将userId发送到服务端
+        messageInfo.setUserId(userId);
         writer.println(new Gson().toJson(messageInfo));
         writer.flush();
     }
@@ -105,17 +105,17 @@ public class SocketClient {
             switch (orderNumber) {
                 case "0":
                     ACTION = SocketUtil.ACTIONS[7];
-                    System.out.println("请输入好友用户名(按Enter键发送消息,按#键加Enter退出聊天):");
-                    String friendClientId = scanner.next();
+                    System.out.println("请输入对方用户名(按Enter键发送消息,按#键加Enter退出聊天):");
+                    String userIdTo = scanner.next();
                     //check user
-                    messageInfo = checkUser(friendClientId);
+                    messageInfo = checkUser(userIdTo);
                     break;
                 case "1":
                     ACTION = SocketUtil.ACTIONS[1];
                     System.out.println("请输入对方用户名：");
-                    String friendId = scanner.next();
+                    String userId = scanner.next();
                     //check user
-                    messageInfo = checkUser(friendId);
+                    messageInfo = checkUser(userId);
                     break;
                 case "2":
                     messageInfo = new MessageInfo();
@@ -132,8 +132,8 @@ public class SocketClient {
     protected static MessageInfo checkUser(String userId){
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setAction(SocketUtil.ACTIONS[5]);
-        messageInfo.setCheckFriendId(userId);
-        messageInfo.setClientId(CLIENT_ID);
+        messageInfo.setCheckUserId(userId);
+        messageInfo.setUserId(USER_ID);
         return messageInfo;
     }
 
@@ -162,7 +162,7 @@ public class SocketClient {
             messageInfo.setAction(SocketUtil.ACTIONS[7]);
             messageInfo.setRoomId(ROOM_ID);
             messageInfo.setMessageMarkId(messageMarkId);
-            messageInfo.setClientId(CLIENT_ID);
+            messageInfo.setUserId(USER_ID);
             ACTION = SocketUtil.ACTIONS[0];
             USER_EXIST = null;
             return messageInfo;
@@ -199,7 +199,7 @@ public class SocketClient {
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setRoomId(roomId);
         messageInfo.setAction(ACTION);
-        messageInfo.setClientId(CLIENT_ID);
+        messageInfo.setUserId(USER_ID);
         Scanner scanner = new Scanner(System.in);
         String messageContent = scanner.next();
         if (messageContent.equals("#")) {
@@ -212,7 +212,7 @@ public class SocketClient {
     }
 
     protected static void initDataFile(String dataPath){
-        MessageReadMarkService.MESSAGE_READ_MARK_FILE_PATH = dataPath + "/messageReadMark_" + CLIENT_ID + ".txt";
+        MessageReadMarkService.MESSAGE_READ_MARK_FILE_PATH = dataPath + "/messageReadMark_" + USER_ID + ".txt";
         FileUtil.createFileIfNotExist(MessageReadMarkService.MESSAGE_READ_MARK_FILE_PATH);
     }
 }

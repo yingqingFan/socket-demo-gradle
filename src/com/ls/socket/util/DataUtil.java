@@ -22,26 +22,6 @@ public class DataUtil<T> {
     }
 
     public List<T> readFromFile(String path, Class<T> type){
-//        List<T> list = new ArrayList<T>();
-//        File file = new File(path);
-//        try {
-//            if(!file.exists()){
-//                file.createNewFile();
-//            }
-//            try(FileReader fileReader = new FileReader(file);
-//            BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-//                Gson gson = new Gson();
-//                String line = null;
-//                while ((line = bufferedReader.readLine()) != null) {
-//                    T object = gson.fromJson(line, type);
-//                    list.add(object);
-//                }
-//            }
-//        } catch (IOException e) {
-//            logger.error(e.getMessage());
-//        }
-//        return list;
-
         List<T> list = new ArrayList<T>();
         File file = FileUtil.createFileIfNotExist(path);
         try(FileReader fileReader = new FileReader(file);

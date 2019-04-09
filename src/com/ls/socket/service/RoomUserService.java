@@ -74,7 +74,7 @@ public class RoomUserService {
 
     public String getSingleRoomIdByUserIds(String id1, String id2){
         String roomId = null;
-        //获取friend和client共同的roomId
+        //获取共同的roomId
         List<String> roomIds1 = getChatRomIdsByUserId(id1);
         List<String> roomIds2 = getChatRomIdsByUserId(id2);
         List<String> exists = new ArrayList<String>(roomIds1);

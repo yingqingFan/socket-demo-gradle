@@ -9,7 +9,7 @@ public class MessageInfo implements Serializable {
     //操作类型
     private String action;
     //当前用户
-    private String clientId;
+    private String userId;
     //聊天室
     private String roomId;
     //消息内容
@@ -19,7 +19,7 @@ public class MessageInfo implements Serializable {
     //消息浏览标记
     private String messageMarkId;
     //对方的用户名（主要用来检查用户是否存在和查询与用户间历史记录）
-    private String checkFriendId;
+    private String checkUserId;
     public String getMessageId() {
         return messageId;
     }
@@ -36,12 +36,12 @@ public class MessageInfo implements Serializable {
         this.action = action;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getRoomId() {
@@ -76,11 +76,11 @@ public class MessageInfo implements Serializable {
         this.messageMarkId = messageMarkId;
     }
 
-    public String getCheckFriendId() {
-        return checkFriendId;
+    public String getCheckUserId() {
+        return checkUserId;
     }
 
-    public void setCheckFriendId(String checkFriendId) {
-        this.checkFriendId = checkFriendId;
+    public void setCheckUserId(String checkUserId) {
+        this.checkUserId = checkUserId;
     }
 }

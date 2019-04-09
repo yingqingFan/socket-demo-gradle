@@ -116,11 +116,11 @@ public class ServerThread extends Thread {
         }catch (IOException e) {
             log.error("error",e);
             SocketServer.socketMap.remove(socketId);
-            String clientId = SocketServer.socketClientMap.get(socketId);
-            SocketServer.socketClientMap.remove(socketId);
-            SocketServer.clientSocketMap.remove(clientId);
-            String outS = "用户：" + clientId + " 已下线";
-            System.out.println("用户：" + clientId + " 断开连接");
+            String userId = SocketServer.socketUserMap.get(socketId);
+            SocketServer.socketUserMap.remove(socketId);
+            SocketServer.userSocketMap.remove(userId);
+            String outS = "用户：" + userId + " 已下线";
+            System.out.println("用户：" + userId + " 断开连接");
             MessageInfo messageInfo = new MessageInfo();
             messageInfo.setMessageContent(outS);
             outOthers(new Gson().toJson(messageInfo));
@@ -129,25 +129,25 @@ public class ServerThread extends Thread {
 
     //绑定客户端
     public void bindClient(MessageInfo messageInfo){
-        String clientId = messageInfo.getClientId();
-        if(StringUtils.isEmpty(SocketServer.clientSocketMap.get(clientId))) {
-            SocketServer.socketClientMap.put(socketId, clientId);
-            SocketServer.clientSocketMap.put(clientId, socketId);
+        String userId = messageInfo.getUserId();
+        if(StringUtils.isEmpty(SocketServer.userSocketMap.get(userId))) {
+            SocketServer.socketUserMap.put(socketId, userId);
+            SocketServer.userSocketMap.put(userId, socketId);
             UserService userService =  new UserService();
-            boolean userIsExsit = userService.checkUserIsExist(clientId);
+            boolean userIsExsit = userService.checkUserIsExist(userId);
             if(!userIsExsit){
                 User user = new User();
-                user.setUserId(clientId);
+                user.setUserId(userId);
                 userService.saveUser(user);
             }
             //客户端上线成功提示
-            String successMessage = "当前用户：" + clientId + " 上线成功";
+            String successMessage = "当前用户：" + userId + " 上线成功";
             messageInfo.setMessageContent(successMessage);
             String successInfo = new Gson().toJson(messageInfo);
             out(successInfo, socketId);
 
             //告诉其他客户端当前客户端上线
-            String outS = clientId + " 已上线";
+            String outS = userId + " 已上线";
             messageInfo.setMessageContent(outS);
             String infoToOthers = new Gson().toJson(messageInfo);
             outOthers(infoToOthers);
@@ -156,13 +156,13 @@ public class ServerThread extends Thread {
 
     //check user is exist
     public void checkUser(MessageInfo messageInfo){
-        boolean userIsExist = new UserService().checkUserIsExist(messageInfo.getCheckFriendId());
+        boolean userIsExist = new UserService().checkUserIsExist(messageInfo.getCheckUserId());
         if(userIsExist){
             RoomUserService roomUserService = new RoomUserService();
-            String roomId = roomUserService.getSingleRoomIdByUserIds(messageInfo.getClientId(), messageInfo.getCheckFriendId());
+            String roomId = roomUserService.getSingleRoomIdByUserIds(messageInfo.getUserId(), messageInfo.getCheckUserId());
             if (roomId == null) {
                 //新建room,并关联用户
-                ChatRoom room = roomUserService.createSingleChatRoom(messageInfo.getClientId(), messageInfo.getCheckFriendId());
+                ChatRoom room = roomUserService.createSingleChatRoom(messageInfo.getUserId(), messageInfo.getCheckUserId());
                 roomId = room.getRoomId();
             }
             messageInfo.setRoomId(roomId);
@@ -178,10 +178,10 @@ public class ServerThread extends Thread {
             int count = 0;
             for (int i = 0; i < messageInfos.size(); i++) {
                 MessageInfo messageInfo1 = messageInfos.get(i);
-                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && !messageInfo1.getClientId().equals(messageInfo.getClientId())) {
+                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && !messageInfo1.getUserId().equals(messageInfo.getUserId())) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
                     String dateStr = dateFormat.format(messageInfo1.getDate());
-                    String messageStr = dateStr + ": " + messageInfo1.getClientId() + ": " + messageInfo1.getMessageContent();
+                    String messageStr = dateStr + ": " + messageInfo1.getUserId() + ": " + messageInfo1.getMessageContent();
                     historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
                     messageMarkId = messageInfo1.getMessageId();
                     messageInfo.setMessageMarkId(messageMarkId);
@@ -206,14 +206,14 @@ public class ServerThread extends Thread {
             List<String> userIds = roomUserService.getUserIdsByRoomId(roomId);
             if(userIds != null && userIds.size()>0){
                 for (int i = 0; i < userIds.size(); i++) {
-                    if(!userIds.get(i).equals(messageInfo.getClientId())) {
-                        String friendSocketId = SocketServer.clientSocketMap.get(userIds.get(i));
+                    if(!userIds.get(i).equals(messageInfo.getUserId())) {
+                        String friendSocketId = SocketServer.userSocketMap.get(userIds.get(i));
                         Socket socket1 = SocketServer.socketMap.get(friendSocketId);
                         if (socket1 != null) {
-                            String clientId = SocketServer.socketClientMap.get(socketId);
-                            messageInfo.setClientId(clientId);
+                            String userId = SocketServer.socketUserMap.get(socketId);
+                            messageInfo.setUserId(userId);
                             String message = messageInfo.getMessageContent();
-                            messageInfo.setMessageContent(clientId + ":" + message);
+                            messageInfo.setMessageContent(userId + ":" + message);
                             //发送信息给目标客户端
                             out(new Gson().toJson(messageInfo), friendSocketId);
                         }
@@ -225,7 +225,7 @@ public class ServerThread extends Thread {
 
     public void outHistoryToClient(MessageInfo messageInfo){
         String historyStr = "";
-        String roomId = new RoomUserService().getSingleRoomIdByUserIds(messageInfo.getClientId(), messageInfo.getCheckFriendId());
+        String roomId = new RoomUserService().getSingleRoomIdByUserIds(messageInfo.getUserId(), messageInfo.getCheckUserId());
         //根据roomId获取消息记录
         List<MessageInfo> messageHistoryList = new MessageInfoService().getMessageInfosByRoomId(roomId);
         if(messageHistoryList.size()>0) {
@@ -234,12 +234,12 @@ public class ServerThread extends Thread {
                 if(sendHistory != null) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
                     String dateStr = dateFormat.format(sendHistory.getDate());
-                    String sendHistoryClientId = sendHistory.getClientId();
-                    String clientId = SocketServer.socketClientMap.get(socketId);
-                    if (sendHistoryClientId.equals(clientId)) {
-                        sendHistoryClientId = sendHistoryClientId + "(我)";
+                    String sendHistoryUserId = sendHistory.getUserId();
+                    String userId = SocketServer.socketUserMap.get(socketId);
+                    if (sendHistoryUserId.equals(userId)) {
+                        sendHistoryUserId = sendHistoryUserId + "(我)";
                     }
-                    String messageStr = dateStr + ": " + sendHistoryClientId + ": " + sendHistory.getMessageContent();
+                    String messageStr = dateStr + ": " + sendHistoryUserId + ": " + sendHistory.getMessageContent();
                     historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
                 }
             }
@@ -263,14 +263,14 @@ public class ServerThread extends Thread {
         while(idIterator.hasNext()){
             String sId = idIterator.next();
             if(!sId.equals(socketId)) {
-                String clientId = SocketServer.socketClientMap.get(sId);
-                usersOnline += clientId + SocketUtil.LINE_SEPARATOR;
+                String userId = SocketServer.socketUserMap.get(sId);
+                usersOnline += userId + SocketUtil.LINE_SEPARATOR;
             }
         }
         if(StringUtils.isEmpty(usersOnline)){
-            usersOnline += "######当前没有好友在线######" + SocketUtil.LINE_SEPARATOR;
+            usersOnline += "######当前没有用户在线######" + SocketUtil.LINE_SEPARATOR;
         }else{
-            usersOnline = "######以下是当前在线好友######" + SocketUtil.LINE_SEPARATOR + usersOnline;
+            usersOnline = "######以下是当前在线用户######" + SocketUtil.LINE_SEPARATOR + usersOnline;
         }
         messageInfo.setMessageContent(usersOnline);
         out(new Gson().toJson(messageInfo), socketId);
@@ -278,10 +278,10 @@ public class ServerThread extends Thread {
 
     //心跳
     public void heartBeat(MessageInfo messageInfo){
-        String clientId = messageInfo.getClientId();
-        String socketId = SocketServer.clientSocketMap.get(clientId);
+        String userId = messageInfo.getUserId();
+        String socketId = SocketServer.userSocketMap.get(userId);
         String heartBeatMessage = messageInfo.getMessageContent();
-        System.out.println(clientId + ":" + heartBeatMessage);
+        System.out.println(userId + ":" + heartBeatMessage);
 //        out(new Gson().toJson(messageInfo),socketId);
     }
 }

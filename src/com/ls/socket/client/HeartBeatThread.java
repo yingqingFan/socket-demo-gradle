@@ -38,7 +38,7 @@ public class HeartBeatThread extends Thread{
         PrintWriter writer = null;
         if(socket != null){
             MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setClientId(SocketClient.CLIENT_ID);
+            messageInfo.setUserId(SocketClient.USER_ID);
             messageInfo.setAction(SocketUtil.ACTIONS[4]);
             messageInfo.setMessageContent("心跳");
             try {

@@ -5,9 +5,9 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
-public class ClientTest {
-    private static Logger log = Logger.getLogger(ClientTest.class);
-    public static void main(String[] args) throws IOException {
+public class ClientStart {
+    private static Logger log = Logger.getLogger(ClientStart.class);
+    public static void main(String[] args) {
         if(ArrayUtils.isEmpty(args) || (args!=null && args.length<1)){
             log.error("必须指定用户名和文件存储目录");
             System.exit(0);
