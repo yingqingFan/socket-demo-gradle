@@ -6,12 +6,20 @@ import java.util.Date;
 public class MessageInfo implements Serializable {
     private static final long serialVersionUID = 3116836935624567198L;
     private String messageId;
+    //操作类型
     private String action;
+    //当前用户
     private String clientId;
+    //聊天室
     private String roomId;
+    //消息内容
     private String messageContent;
+    //消息时间
     private Date date;
-
+    //消息浏览标记
+    private String messageMarkId;
+    //对方的用户名（主要用来检查用户是否存在和查询与用户间历史记录）
+    private String checkFriendId;
     public String getMessageId() {
         return messageId;
     }
@@ -58,5 +66,21 @@ public class MessageInfo implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getMessageMarkId() {
+        return messageMarkId;
+    }
+
+    public void setMessageMarkId(String messageMarkId) {
+        this.messageMarkId = messageMarkId;
+    }
+
+    public String getCheckFriendId() {
+        return checkFriendId;
+    }
+
+    public void setCheckFriendId(String checkFriendId) {
+        this.checkFriendId = checkFriendId;
     }
 }

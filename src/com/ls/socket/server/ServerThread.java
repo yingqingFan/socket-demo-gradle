@@ -1,13 +1,13 @@
 package com.ls.socket.server;
 
 import com.google.gson.Gson;
+import com.ls.socket.entity.ChatRoom;
 import com.ls.socket.entity.MessageInfo;
 import com.ls.socket.entity.User;
 import com.ls.socket.service.MessageInfoService;
 import com.ls.socket.service.RoomUserService;
 import com.ls.socket.service.UserService;
 import com.ls.socket.util.SocketUtil;
-import com.ls.socket.util.DataUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -87,14 +87,17 @@ public class ServerThread extends Thread {
                     if(messageInfo.getAction().equals(SocketUtil.ACTIONS[3])){
                         bindClient(messageInfo);
                     }
-//                    //初始化发送消息
-//                    if(messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
-//                       initSendMessage(messageInfo);
-//                    }
-                    //初始化发送消息
+                    //检查用户是否存在
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
+                        checkUser(messageInfo);
+                    }
+                    //展示未读聊天室历史记录
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
+                       showUnreadRoomHistory(messageInfo);
+                    }
+                    //发送消息
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[0])) {
-//                        sendMessage(messageInfo);
-                        initSendMessage(messageInfo);
+                        sendMessage(messageInfo);
                     }
                     //如果客户端是查看聊天历史记录，返回历史记录给客户端
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[1])){
@@ -151,8 +154,50 @@ public class ServerThread extends Thread {
         }
     }
 
-    //初始化发送消息（开启会话，显示发送历史）
-    public void initSendMessage(MessageInfo messageInfo){
+    //check user is exist
+    public void checkUser(MessageInfo messageInfo){
+        boolean userIsExist = new UserService().checkUserIsExist(messageInfo.getCheckFriendId());
+        if(userIsExist){
+            RoomUserService roomUserService = new RoomUserService();
+            String roomId = roomUserService.getSingleRoomIdByUserIds(messageInfo.getClientId(), messageInfo.getCheckFriendId());
+            if (roomId == null) {
+                //新建room,并关联用户
+                ChatRoom room = roomUserService.createSingleChatRoom(messageInfo.getClientId(), messageInfo.getCheckFriendId());
+                roomId = room.getRoomId();
+            }
+            messageInfo.setRoomId(roomId);
+        }
+        out(new Gson().toJson(messageInfo), socketId);
+    }
+
+    public void showUnreadRoomHistory(MessageInfo messageInfo){
+        List<MessageInfo> messageInfos = new MessageInfoService().getMessageInfosByRoomId(messageInfo.getRoomId());
+        if (messageInfos.size() > 0) {
+            String historyStr = "";
+            String messageMarkId = messageInfo.getMessageMarkId();
+            int count = 0;
+            for (int i = 0; i < messageInfos.size(); i++) {
+                MessageInfo messageInfo1 = messageInfos.get(i);
+                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && !messageInfo1.getClientId().equals(messageInfo.getClientId())) {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+                    String dateStr = dateFormat.format(messageInfo1.getDate());
+                    String messageStr = dateStr + ": " + messageInfo1.getClientId() + ": " + messageInfo1.getMessageContent();
+                    historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
+                    messageMarkId = messageInfo1.getMessageId();
+                    messageInfo.setMessageMarkId(messageMarkId);
+                    count ++;
+                }
+            }
+            if (count>0){
+                historyStr += "------以上是未浏览消息记录("+ count +"条)------"+SocketUtil.LINE_SEPARATOR;
+                messageInfo.setMessageContent(historyStr);
+                out(new Gson().toJson(messageInfo), socketId);
+            }
+        }
+    }
+
+    //发送消息
+    public void sendMessage(MessageInfo messageInfo){
         //将messageInfo存入本地文件
         messageInfo = new MessageInfoService().saveMessageInfo(messageInfo);
         String roomId = messageInfo.getRoomId();
@@ -165,29 +210,24 @@ public class ServerThread extends Thread {
                         String friendSocketId = SocketServer.clientSocketMap.get(userIds.get(i));
                         Socket socket1 = SocketServer.socketMap.get(friendSocketId);
                         if (socket1 != null) {
-                            sendMessage(messageInfo, friendSocketId);
+                            String clientId = SocketServer.socketClientMap.get(socketId);
+                            messageInfo.setClientId(clientId);
+                            String message = messageInfo.getMessageContent();
+                            messageInfo.setMessageContent(clientId + ":" + message);
+                            //发送信息给目标客户端
+                            out(new Gson().toJson(messageInfo), friendSocketId);
                         }
                     }
                 }
             }
-
         }
-    }
-
-    //发送消息
-    public void sendMessage(MessageInfo messageInfo, String friendSocketId){
-        String clientId = SocketServer.socketClientMap.get(socketId);
-        messageInfo.setClientId(clientId);
-        String message = messageInfo.getMessageContent();
-        messageInfo.setMessageContent(clientId + ":" + message);
-        //发送信息给目标客户端
-        out(new Gson().toJson(messageInfo), friendSocketId);
     }
 
     public void outHistoryToClient(MessageInfo messageInfo){
         String historyStr = "";
+        String roomId = new RoomUserService().getSingleRoomIdByUserIds(messageInfo.getClientId(), messageInfo.getCheckFriendId());
         //根据roomId获取消息记录
-        List<MessageInfo> messageHistoryList = new MessageInfoService().getMessageInfosByRoomId(messageInfo.getRoomId());
+        List<MessageInfo> messageHistoryList = new MessageInfoService().getMessageInfosByRoomId(roomId);
         if(messageHistoryList.size()>0) {
             for (int i = 0; i < messageHistoryList.size(); i++) {
                 MessageInfo sendHistory = messageHistoryList.get(i);
@@ -228,9 +268,9 @@ public class ServerThread extends Thread {
             }
         }
         if(StringUtils.isEmpty(usersOnline)){
-            usersOnline += "######当前没有好友在线(按#键加Enter键退出查询)######" + SocketUtil.LINE_SEPARATOR;
+            usersOnline += "######当前没有好友在线######" + SocketUtil.LINE_SEPARATOR;
         }else{
-            usersOnline = "######以下是当前在线好友(按#键加Enter键退出查询)######" + SocketUtil.LINE_SEPARATOR + usersOnline;
+            usersOnline = "######以下是当前在线好友######" + SocketUtil.LINE_SEPARATOR + usersOnline;
         }
         messageInfo.setMessageContent(usersOnline);
         out(new Gson().toJson(messageInfo), socketId);

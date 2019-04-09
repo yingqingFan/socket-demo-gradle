@@ -1,7 +1,5 @@
 package com.ls.socket.entity;
 
-import java.util.Date;
-
 public class ChatRoom {
     public static String CHAT_TYPE_SINGLE = "S";
     public static String CHAT_TYPE_GROUP = "G";

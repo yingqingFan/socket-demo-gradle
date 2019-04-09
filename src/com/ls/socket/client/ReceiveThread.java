@@ -1,9 +1,9 @@
 package com.ls.socket.client;
 
 import com.google.gson.Gson;
-import com.ls.socket.client.entity.MessageReadMark;
-import com.ls.socket.client.service.MessageReadMarkService;
 import com.ls.socket.entity.MessageInfo;
+import com.ls.socket.entity.MessageReadMark;
+import com.ls.socket.service.MessageReadMarkService;
 import com.ls.socket.service.RoomUserService;
 import com.ls.socket.util.SocketUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -35,22 +35,36 @@ public class ReceiveThread extends Thread{
                         if (StringUtils.isEmpty(SocketClient.ROOM_ID)) {
                             System.out.println(messageInfo.getMessageContent());
                         } else {
-                            RoomUserService roomUserService = new RoomUserService();
-                            List<String> userIds = roomUserService.getUserIdsByRoomId(SocketClient.ROOM_ID);
-                            if(userIds != null && userIds.size()>0){
-                                if(userIds.contains(messageInfo.getClientId())){
-                                    System.out.println(messageInfo.getMessageContent());
-                                    String messageId = messageInfo.getMessageId();
-                                    MessageReadMark messageReadMark = new MessageReadMark();
-                                    messageReadMark.setMessageId(messageId);
-                                    messageReadMark.setRoomId(SocketClient.ROOM_ID);
-                                    new MessageReadMarkService().saveMessageReadMark(messageReadMark);
-                                }
+                            if(messageInfo.getRoomId().equals(SocketClient.ROOM_ID)){
+                                System.out.println(messageInfo.getMessageContent());
+                                String messageId = messageInfo.getMessageId();
+                                MessageReadMark messageReadMark = new MessageReadMark();
+                                messageReadMark.setMessageId(messageId);
+                                messageReadMark.setRoomId(SocketClient.ROOM_ID);
+                                new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                             }
                         }
                     } else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[6])){
                         log.error(messageInfo.getMessageContent());
                         System.exit(0);
+                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
+                        if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {
+                            System.out.println(messageInfo.getMessageContent());
+                        }
+                        String roomId = messageInfo.getRoomId();
+                        if(StringUtils.isEmpty(roomId)){
+                            SocketClient.USER_EXIST = "false";
+                        }else{
+                            SocketClient.USER_EXIST = "true";
+                            SocketClient.ROOM_ID = roomId;
+                        }
+                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
+                        System.out.println(messageInfo.getMessageContent());
+                        String messageMarkId = messageInfo.getMessageMarkId();
+                        MessageReadMark messageReadMark = new MessageReadMark();
+                        messageReadMark.setRoomId(messageInfo.getRoomId());
+                        messageReadMark.setMessageId(messageMarkId);
+                        new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                     } else {
                         System.out.println(messageInfo.getMessageContent());
                     }

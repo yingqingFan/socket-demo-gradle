@@ -10,20 +10,6 @@ import java.util.List;
 public class DataUtil<T> {
     private static Logger logger = Logger.getLogger(DataUtil.class);
     public void writeToFile(String path, T object){
-//        File file = new File(path);
-//        try {
-//            if(!file.exists()){
-//                file.createNewFile();
-//            }
-//            Gson gson = new Gson();
-//            String data = gson.toJson(object);
-//            try(FileWriter fileWriter = new FileWriter(file, true)){
-//                fileWriter.write(data + SocketUtil.LINE_SEPARATOR);
-//                fileWriter.flush();
-//            }
-//        } catch (IOException e) {
-//            logger.error(e.getMessage());
-//        }
         File file = FileUtil.createFileIfNotExist(path);
         Gson gson = new Gson();
         String data = gson.toJson(object);

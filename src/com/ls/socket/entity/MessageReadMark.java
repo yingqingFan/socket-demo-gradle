@@ -1,4 +1,4 @@
-package com.ls.socket.client.entity;
+package com.ls.socket.entity;
 
 /**
  * 标记信息读取位置，每个客户端对应一个

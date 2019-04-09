@@ -6,7 +6,6 @@ import com.ls.socket.util.DataUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class RoomUserService {

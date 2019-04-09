@@ -1,12 +1,9 @@
 package com.ls.socket.service;
 
 import com.ls.socket.entity.MessageInfo;
-import com.ls.socket.server.SocketServer;
 import com.ls.socket.util.DataUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class MessageInfoService {

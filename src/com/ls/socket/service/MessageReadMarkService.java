@@ -1,6 +1,6 @@
-package com.ls.socket.client.service;
+package com.ls.socket.service;
 
-import com.ls.socket.client.entity.MessageReadMark;
+import com.ls.socket.entity.MessageReadMark;
 import com.ls.socket.util.DataUtil;
 
 import java.util.List;
