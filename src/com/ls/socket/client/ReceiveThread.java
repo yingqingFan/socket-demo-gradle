@@ -44,10 +44,14 @@ public class ReceiveThread extends Thread{
                                 new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                             }
                         }
-                    } else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[6])){
+                    } else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[2])){
+                        SocketClient.IS_RESPONSE = "true";
+                        System.out.println(messageInfo.getMessageContent());
+                    }else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[6])){
                         log.error(messageInfo.getMessageContent());
                         System.exit(0);
                     }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
+                        SocketClient.IS_RESPONSE = "true";
                         if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {
                             System.out.println(messageInfo.getMessageContent());
                         }

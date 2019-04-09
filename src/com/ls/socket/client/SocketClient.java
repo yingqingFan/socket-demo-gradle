@@ -19,6 +19,7 @@ public class SocketClient {
     public static String ROOM_ID = null;
     public static String USER_ID = null;
     public static String USER_EXIST = null;
+    public static String IS_RESPONSE = null;
     private static Logger log = Logger.getLogger(SocketClient.class);
     public static void run(String userId, String dataPath, String ip, int port){
         if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(dataPath)){
@@ -98,6 +99,16 @@ public class SocketClient {
                 messageInfo = completeMessageInfoByRoomId(ROOM_ID);
             }else if(ACTION.equals(SocketUtil.ACTIONS[1])){
                 messageInfo = showUserHistory();
+            }else if(ACTION.equals(SocketUtil.ACTIONS[2])){
+                while(StringUtils.isEmpty(IS_RESPONSE)){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        log.error("Thread error!", e);
+                    }
+                }
+                IS_RESPONSE = null;
+                ACTION = null;
             }
         }else {
             System.out.println("选择序号：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2]);
@@ -120,6 +131,7 @@ public class SocketClient {
                 case "2":
                     messageInfo = new MessageInfo();
                     messageInfo.setAction(SocketUtil.ACTIONS[2]);
+                    ACTION = SocketUtil.ACTIONS[2];
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
@@ -138,13 +150,14 @@ public class SocketClient {
     }
 
     protected static MessageInfo showUnReadRoomHistory(){
-        while(StringUtils.isEmpty(USER_EXIST)){
+        while(StringUtils.isEmpty(IS_RESPONSE)){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 log.error("Thread error!", e);
             }
         }
+        IS_RESPONSE = null;
         if(USER_EXIST.equals("true")){
             System.out.println("提示：已进入聊天室（光标处输入想要发送的消息，按Enter键发送）");
             MessageReadMarkService messageReadMarkService = new MessageReadMarkService();
@@ -175,13 +188,14 @@ public class SocketClient {
     }
 
     protected static MessageInfo showUserHistory(){
-        while(StringUtils.isEmpty(USER_EXIST)){
+        while(StringUtils.isEmpty(IS_RESPONSE)){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 log.error("Thread error!", e);
             }
         }
+        IS_RESPONSE = null;
         if(USER_EXIST.equals("true")) {
             MessageInfo messageInfo = completeMessageInfoByRoomId(ROOM_ID);
             USER_EXIST = null;
