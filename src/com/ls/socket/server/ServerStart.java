@@ -7,12 +7,16 @@ import java.io.IOException;
 
 public class ServerStart {
     private static Logger log = Logger.getLogger(ServerStart.class);
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         if(ArrayUtils.isEmpty(args)){
             log.error("必须指定数据存储位置(文件名默认为：messageInfo.txt)");
             System.exit(0);
         }
         String path = args[0];
-        SocketServer.run(9999, path);
+        try {
+            SocketServer.run(9999, path);
+        } catch (IOException e) {
+            log.error("Server run error", e);
+        }
     }
 }

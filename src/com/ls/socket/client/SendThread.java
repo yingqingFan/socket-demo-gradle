@@ -33,11 +33,11 @@ public class SendThread extends Thread{
                 writer.flush();
             }
         }catch (IOException e) {
-            log.error("error",e);
+            log.error("IOException",e);
             try {
                 socket.close();
             } catch (IOException e1) {
-                log.error("error",e1);
+                log.error("IOException",e1);
             }
             if(writer != null) {
                writer.close();

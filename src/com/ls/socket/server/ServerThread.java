@@ -41,7 +41,7 @@ public class ServerThread extends Thread {
             //读取客户端信息并转发
             readAndSend();
         } catch (IOException e) {
-            log.error("error",e);
+            log.error("IOException",e);
         }
     }
 

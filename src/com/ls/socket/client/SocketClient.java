@@ -54,11 +54,12 @@ public class SocketClient {
             //绑定客户端信息
             bindInfoWithServer(USER_ID, writer);
         }catch (IOException e){
+            log.error("IOException", e);
             if(socket != null){
                 try {
                     socket.close();
                 } catch (IOException e1) {
-                    log.error(e1.getMessage());
+                    log.error("IOException", e1);
                 }
             }
             if(writer != null) {

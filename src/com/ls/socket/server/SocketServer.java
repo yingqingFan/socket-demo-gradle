@@ -12,8 +12,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class SocketServer {
     private static Logger log = Logger.getLogger(SocketServer.class);
@@ -31,8 +29,8 @@ public class SocketServer {
         ServerSocket server = new ServerSocket(port);
         //输出当前服务器的端口号
         log.debug("服务器创建成功，端口号：" + server.getLocalPort());
-        //容纳三个线程的线程池
-        Executor pool = Executors.newFixedThreadPool(100);
+//        //容纳三个线程的线程池
+//        Executor pool = Executors.newFixedThreadPool(100);
         boolean flag = true;
         while (flag) {
             //阻塞等待客户端连接

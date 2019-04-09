@@ -27,7 +27,7 @@ public class HeartBeatThread extends Thread{
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                log.error(e.getMessage());
+                log.error("InterruptedException", e);
             }
             sendHeartBeat();
         }
@@ -46,7 +46,7 @@ public class HeartBeatThread extends Thread{
                 writer.println(new Gson().toJson(messageInfo));
                 writer.flush();
             } catch (IOException e) {
-                log.error("error",e);
+                log.error("IOException",e);
                 if(writer != null){
                     writer.close();
                 }

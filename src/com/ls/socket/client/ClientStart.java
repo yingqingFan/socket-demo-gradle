@@ -3,8 +3,6 @@ package com.ls.socket.client;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
-
 public class ClientStart {
     private static Logger log = Logger.getLogger(ClientStart.class);
     public static void main(String[] args) {
