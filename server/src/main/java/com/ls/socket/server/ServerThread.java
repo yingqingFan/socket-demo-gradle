@@ -189,7 +189,7 @@ public class ServerThread extends Thread {
                 }
             }
             if (count>0){
-                historyStr += "------以上是未浏览消息记录("+ count +"条)------"+SocketUtil.LINE_SEPARATOR;
+                historyStr += "------以上是未浏览消息记录("+ count +"条)------"+ SocketUtil.LINE_SEPARATOR;
                 messageInfo.setMessageContent(historyStr);
                 out(new Gson().toJson(messageInfo), socketId);
             }

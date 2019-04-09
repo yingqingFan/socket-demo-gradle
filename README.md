@@ -13,5 +13,5 @@
 * 查看与相应用户之间的聊天信息
 
 #运行
-* 将client和server打成jar；  
-* 运行命令 java -jar server.jar [参数：数据存储目录], java -jar client.jar [参数：用户名] [参数：数据存储目录]
+* 运行命令：gradle build，生成 server-1.0.jar 和 client-1.0.jar
+* 运行命令：java -jar server-1.0.jar [参数：数据存储目录], java -jar client-1.0.jar [参数：用户名] [参数：数据存储目录]
