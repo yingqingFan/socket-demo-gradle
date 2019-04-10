@@ -50,9 +50,13 @@ public class HeartBeatThread extends Thread{
                 if(writer != null){
                     writer.close();
                 }
+                SocketClient.sendThread.stop();
+                SocketClient.receiveThread.stop();
                 reconnect(ip, port);
             }
         }else{
+            SocketClient.sendThread.stop();
+            SocketClient.receiveThread.stop();
             reconnect(ip, port);
         }
     }

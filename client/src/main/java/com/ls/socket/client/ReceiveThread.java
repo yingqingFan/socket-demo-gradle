@@ -42,14 +42,11 @@ public class ReceiveThread extends Thread{
                                 new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                             }
                         }
-                    } else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[2])){
-                        SocketClient.IS_RESPONSE = "true";
+                    } else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[2]))){
+                        SocketClient.ACTION = null;
                         System.out.println(messageInfo.getMessageContent());
-                    }else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[6])){
-                        log.error(messageInfo.getMessageContent());
-                        System.exit(0);
-                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
                         SocketClient.IS_RESPONSE = "true";
+                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
                         if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {
                             System.out.println(messageInfo.getMessageContent());
                         }
@@ -60,6 +57,10 @@ public class ReceiveThread extends Thread{
                             SocketClient.USER_EXIST = "true";
                             SocketClient.ROOM_ID = roomId;
                         }
+                        SocketClient.IS_RESPONSE = "true";
+                    }else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[6])){
+                        log.error(messageInfo.getMessageContent());
+                        System.exit(0);
                     }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
                         System.out.println(messageInfo.getMessageContent());
                         String messageMarkId = messageInfo.getMessageMarkId();
@@ -67,6 +68,7 @@ public class ReceiveThread extends Thread{
                         messageReadMark.setRoomId(messageInfo.getRoomId());
                         messageReadMark.setMessageId(messageMarkId);
                         new MessageReadMarkService().saveMessageReadMark(messageReadMark);
+                        SocketClient.IS_RESPONSE = "true";
                     } else {
                         System.out.println(messageInfo.getMessageContent());
                     }

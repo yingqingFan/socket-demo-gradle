@@ -226,7 +226,7 @@ public class ServerThread extends Thread {
 
     public void outHistoryToClient(MessageInfo messageInfo){
         String historyStr = "";
-        String roomId = new RoomUserService().getSingleRoomIdByUserIds(messageInfo.getUserId(), messageInfo.getCheckUserId());
+        String roomId = messageInfo.getRoomId();
         //根据roomId获取消息记录
         List<MessageInfo> messageHistoryList = new MessageInfoService().getMessageInfosByRoomId(roomId);
         if(messageHistoryList.size()>0) {

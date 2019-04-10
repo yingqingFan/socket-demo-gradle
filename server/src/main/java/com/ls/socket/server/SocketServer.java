@@ -15,10 +15,10 @@ import java.util.Map;
 
 public class SocketServer {
     private static Logger log = Logger.getLogger(SocketServer.class);
-    protected static Map<String, Socket> socketMap = new HashMap<>();
-    protected static Map<String, String> userSocketMap = new HashMap<>();
-    protected static Map<String, String> socketUserMap = new HashMap<>();
-    public static void run(int port, String dataPath) throws IOException {
+    public static Map<String, Socket> socketMap = new HashMap<>();
+    public static Map<String, String> userSocketMap = new HashMap<>();
+    public static Map<String, String> socketUserMap = new HashMap<>();
+    public void run(int port, String dataPath) throws IOException {
         if(StringUtils.isEmpty(dataPath)){
             log.error("必须指定数据存储位置");
             System.exit(0);
@@ -48,7 +48,7 @@ public class SocketServer {
         }
     }
 
-    protected static void initDataFile(String dataPath){
+    public void initDataFile(String dataPath){
         MessageInfoService.MESSAGE_FILE_PATH = dataPath + "/messageInfo.txt";
         RoomUserService.ROOM_FILE_PATH = dataPath + "/room.txt";
         RoomUserService.ROOM_USER_FILE_PATH = dataPath + "/roomUser.txt";

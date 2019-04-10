@@ -14,7 +14,7 @@ public class ServerStart {
         }
         String path = args[0];
         try {
-            SocketServer.run(9999, path);
+            new SocketServer().run(9999, path);
         } catch (IOException e) {
             log.error("Server run error", e);
         }

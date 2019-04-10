@@ -12,6 +12,6 @@ public class ClientStart {
         }
         String userId = args[0];
         String dataPath = args[1];
-        SocketClient.run(userId, dataPath,"localhost", 9999);
+        new SocketClient().run(userId, dataPath,"localhost", 9999);
     }
 }
