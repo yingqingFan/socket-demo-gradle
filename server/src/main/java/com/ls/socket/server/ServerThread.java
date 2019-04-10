@@ -22,8 +22,8 @@ import java.util.List;
 
 public class ServerThread extends Thread {
     private static Logger log = Logger.getLogger(ServerThread.class);
-    private PrintWriter writer;//输出流
-    private BufferedReader bufferedReader;//输入流
+    private PrintWriter writer;
+    private BufferedReader bufferedReader;
     private Socket socket;
     private String socketId;
 
@@ -51,18 +51,13 @@ public class ServerThread extends Thread {
             Socket socket1 = SocketServer.socketMap.get(socketId);
             if(socket1!=null) {
                 PrintWriter printWriter1 = new PrintWriter(socket1.getOutputStream());
-                //将信息发送客户机
+                //将信息发送到客户机
                 printWriter1.println(outS);
                 //强制输出到命令行的界面中
                 printWriter1.flush();
-            }else{
-                //提示客户端指定客户端不存在
-                writer.println("目标用户不存在,请按#号键退出重新选择！");
-                //强制输出到命令行的界面中
-                writer.flush();
             }
         }catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("IOException", e);
         }
     }
 
@@ -119,8 +114,8 @@ public class ServerThread extends Thread {
             String userId = SocketServer.socketUserMap.get(socketId);
             SocketServer.socketUserMap.remove(socketId);
             SocketServer.userSocketMap.remove(userId);
-            String outS = "用户：" + userId + " 已下线";
-            System.out.println("用户：" + userId + " 断开连接");
+            String outS = "提示： " + userId + " 已下线";
+            System.out.println("提示： " + userId + " 断开连接");
             MessageInfo messageInfo = new MessageInfo();
             messageInfo.setMessageContent(outS);
             outOthers(new Gson().toJson(messageInfo));
@@ -141,13 +136,14 @@ public class ServerThread extends Thread {
                 userService.saveUser(user);
             }
             //客户端上线成功提示
-            String successMessage = "当前用户：" + userId + " 上线成功";
+            String successMessage = "提示： 当前用户 " + userId + " 上线成功";
+            System.out.println("提示： " + userId + " 已连接");
             messageInfo.setMessageContent(successMessage);
             String successInfo = new Gson().toJson(messageInfo);
             out(successInfo, socketId);
 
             //告诉其他客户端当前客户端上线
-            String outS = userId + " 已上线";
+            String outS = "提示： " + userId + " 已上线";
             messageInfo.setMessageContent(outS);
             String infoToOthers = new Gson().toJson(messageInfo);
             outOthers(infoToOthers);

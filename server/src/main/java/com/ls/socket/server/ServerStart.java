@@ -9,7 +9,7 @@ public class ServerStart {
     private static Logger log = Logger.getLogger(ServerStart.class);
     public static void main(String[] args) {
         if(ArrayUtils.isEmpty(args)){
-            log.error("必须指定数据存储位置(文件名默认为：messageInfo.txt)");
+            log.error("必须指定数据存储位置");
             System.exit(0);
         }
         String path = args[0];
