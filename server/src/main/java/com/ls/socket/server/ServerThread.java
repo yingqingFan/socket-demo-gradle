@@ -147,6 +147,11 @@ public class ServerThread extends Thread {
             messageInfo.setMessageContent(outS);
             String infoToOthers = new Gson().toJson(messageInfo);
             outOthers(infoToOthers);
+        }else{
+            messageInfo.setMessageContent("用户 " + userId + " 正在使用中，请更换用户名重新启动！");
+            messageInfo.setAction(SocketUtil.ACTIONS[6]);
+            String failInfo = new Gson().toJson(messageInfo);
+            out(failInfo, socketId);
         }
     }
 
