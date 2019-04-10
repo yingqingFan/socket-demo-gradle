@@ -42,7 +42,12 @@ public class ReceiveThread extends Thread{
                                 new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                             }
                         }
-                    } else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[2]))){
+                    } else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]))){
+                        SocketClient.ACTION = null;
+                        System.out.println(messageInfo.getMessageContent());
+                        saveMessageReadMarkByMessageInfo(messageInfo);
+                        SocketClient.IS_RESPONSE = "true";
+                    }else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[2])){
                         SocketClient.ACTION = null;
                         System.out.println(messageInfo.getMessageContent());
                         SocketClient.IS_RESPONSE = "true";
@@ -63,11 +68,7 @@ public class ReceiveThread extends Thread{
                         System.exit(0);
                     }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
                         System.out.println(messageInfo.getMessageContent());
-                        String messageMarkId = messageInfo.getMessageMarkId();
-                        MessageReadMark messageReadMark = new MessageReadMark();
-                        messageReadMark.setRoomId(messageInfo.getRoomId());
-                        messageReadMark.setMessageId(messageMarkId);
-                        new MessageReadMarkService().saveMessageReadMark(messageReadMark);
+                        saveMessageReadMarkByMessageInfo(messageInfo);
                         SocketClient.IS_RESPONSE = "true";
                     } else {
                         System.out.println(messageInfo.getMessageContent());
@@ -91,5 +92,13 @@ public class ReceiveThread extends Thread{
             log.debug("无法连接服务器");
             return;
         }
+    }
+
+    public void saveMessageReadMarkByMessageInfo(MessageInfo messageInfo){
+        String messageMarkId = messageInfo.getMessageMarkId();
+        MessageReadMark messageReadMark = new MessageReadMark();
+        messageReadMark.setRoomId(messageInfo.getRoomId());
+        messageReadMark.setMessageId(messageMarkId);
+        new MessageReadMarkService().saveMessageReadMark(messageReadMark);
     }
 }

@@ -91,6 +91,7 @@ public class SendThread extends Thread{
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
+                    SocketClient.IS_RESPONSE = "true";
                     break;
             }
         }

@@ -245,6 +245,7 @@ public class ServerThread extends Thread {
                     }
                     String messageStr = dateStr + ": " + sendHistoryUserId + ": " + sendHistory.getMessageContent();
                     historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
+                    messageInfo.setMessageMarkId(sendHistory.getMessageId());
                 }
             }
             if(!StringUtils.isEmpty(historyStr)){
