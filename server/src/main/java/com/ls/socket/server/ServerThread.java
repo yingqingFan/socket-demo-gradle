@@ -113,12 +113,15 @@ public class ServerThread extends Thread {
             SocketServer.socketMap.remove(socketId);
             String userId = SocketServer.socketUserMap.get(socketId);
             SocketServer.socketUserMap.remove(socketId);
-            SocketServer.userSocketMap.remove(userId);
-            String outS = "提示： " + userId + " 已下线";
-            System.out.println("提示： " + userId + " 断开连接");
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setMessageContent(outS);
-            outOthers(new Gson().toJson(messageInfo));
+            //bindClient失败时socket没有对应userId，无需显示下线通知
+            if(!StringUtils.isEmpty(userId)) {
+                SocketServer.userSocketMap.remove(userId);
+                String outS = "提示： " + userId + " 已下线";
+                System.out.println("提示： " + userId + " 断开连接");
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setMessageContent(outS);
+                outOthers(new Gson().toJson(messageInfo));
+            }
         }
     }
 
@@ -148,7 +151,7 @@ public class ServerThread extends Thread {
             String infoToOthers = new Gson().toJson(messageInfo);
             outOthers(infoToOthers);
         }else{
-            messageInfo.setMessageContent("用户 " + userId + " 正在使用中，请更换用户名重新启动！");
+            messageInfo.setMessageContent("用户 " + userId + " 已被使用，请更换用户名重新启动！");
             messageInfo.setAction(SocketUtil.ACTIONS[6]);
             String failInfo = new Gson().toJson(messageInfo);
             out(failInfo, socketId);
