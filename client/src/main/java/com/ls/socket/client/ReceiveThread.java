@@ -50,6 +50,7 @@ public class ReceiveThread extends Thread{
                     }else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[2])){
                         SocketClient.ACTION = null;
                         System.out.println(messageInfo.getMessageContent());
+                        SocketClient.CHOOSE_NO = "0";
                         SocketClient.IS_RESPONSE = "true";
                     }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
                         if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {

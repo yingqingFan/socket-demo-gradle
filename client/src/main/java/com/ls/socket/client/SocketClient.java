@@ -20,6 +20,7 @@ public class SocketClient {
     public static String IS_RESPONSE = null;
     public static SendThread sendThread = null;
     public static ReceiveThread receiveThread = null;
+    public static String CHOOSE_NO = null;
     private static Logger log = Logger.getLogger(SocketClient.class);
     public void run(String userId, String dataPath, String ip, int port){
         if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(dataPath)){

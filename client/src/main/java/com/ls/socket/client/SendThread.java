@@ -67,13 +67,19 @@ public class SendThread extends Thread{
                 messageInfo = showUserHistory();
             }
         }else {
-            System.out.println("选择序号：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2]);
-            String orderNumber = scanner.next();
-            switch (orderNumber) {
+            if(StringUtils.isEmpty(SocketClient.CHOOSE_NO)) {
+                System.out.println("选择序号(按#键加Enter返回到此选择)：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2]);
+                SocketClient.CHOOSE_NO = scanner.next();
+            }
+            switch (SocketClient.CHOOSE_NO) {
                 case "0":
                     SocketClient.ACTION = SocketUtil.ACTIONS[7];
-                    System.out.println("请输入对方用户名(按Enter键发送消息,按#键加Enter退出聊天):");
+                    System.out.println("请输入对方用户名(按Enter键发送消息):");
                     String userIdTo = scanner.next();
+                    if (userIdTo.equals("#")) {
+                        init();
+                        return null;
+                    }
                     //check user
                     messageInfo = checkUser(userIdTo);
                     break;
@@ -81,6 +87,10 @@ public class SendThread extends Thread{
                     SocketClient.ACTION = SocketUtil.ACTIONS[1];
                     System.out.println("请输入对方用户名：");
                     String userId = scanner.next();
+                    if (userId.equals("#")) {
+                        init();
+                        return null;
+                    }
                     //check user
                     messageInfo = checkUser(userId);
                     break;
@@ -91,7 +101,7 @@ public class SendThread extends Thread{
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
-                    SocketClient.IS_RESPONSE = "true";
+                    init();
                     break;
             }
         }
@@ -130,9 +140,8 @@ public class SendThread extends Thread{
             return messageInfo;
         }else{
             System.out.println("用户不存在");
-            SocketClient.USER_EXIST = null;
-            SocketClient.ACTION = null;
-            SocketClient.IS_RESPONSE = "true";
+            init();
+            SocketClient.CHOOSE_NO = "0";
             return null;
         }
     }
@@ -145,9 +154,8 @@ public class SendThread extends Thread{
             return messageInfo;
         }else{
             System.out.println("用户不存在");
-            SocketClient.USER_EXIST = null;
-            SocketClient.ACTION = null;
-            SocketClient.IS_RESPONSE = "true";
+            init();
+            SocketClient.CHOOSE_NO = "1";
             return null;
         }
     }
@@ -160,9 +168,7 @@ public class SendThread extends Thread{
         Scanner scanner = new Scanner(System.in);
         String messageContent = scanner.next();
         if (messageContent.equals("#")) {
-            SocketClient.ACTION = null;
-            SocketClient.ROOM_ID = null;
-            SocketClient.IS_RESPONSE = "true";
+            init();
             return null;
         }
         messageInfo.setMessageContent(messageContent);
@@ -186,5 +192,12 @@ public class SendThread extends Thread{
             }
         }
         SocketClient.IS_RESPONSE = null;
+    }
+
+    public void init(){
+        SocketClient.ACTION = null;
+        SocketClient.ROOM_ID = null;
+        SocketClient.IS_RESPONSE = "true";
+        SocketClient.CHOOSE_NO = null;
     }
 }
