@@ -115,14 +115,6 @@ public class SendThread extends Thread{
                         init();
                         return null;
                     }
-                   while(userId.equals(SocketClient.USER_ID)){
-                       System.out.println("用户名不能为自己的用户名，请输入对方用户名：");
-                       userId = scanner.next();
-                       if (userId.equals("#")) {
-                           init();
-                           return null;
-                       }
-                   }
                     //check user
                     messageInfo = checkUser(userId);
                     break;
@@ -170,6 +162,15 @@ public class SendThread extends Thread{
     }
 
     public MessageInfo checkUser(String userId){
+        Scanner scanner = new Scanner(System.in);
+        while(userId.equals(SocketClient.USER_ID)){
+            System.out.println("用户名不能为自己的用户名，请输入对方用户名：");
+            userId = scanner.next();
+            if (userId.equals("#")) {
+                init();
+                return null;
+            }
+        }
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setAction(SocketUtil.ACTIONS[5]);
         messageInfo.setCheckUserId(userId);
