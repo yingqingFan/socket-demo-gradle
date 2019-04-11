@@ -127,6 +127,15 @@ public class RoomUserService {
     }
 
     public synchronized RoomUser saveRoomUser(RoomUser roomUser){
+        String userId = roomUser.getUserId();
+        String roomId = roomUser.getRoomId();
+        if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(roomId)){
+            return null;
+        }
+        RoomUser roomUser1 = getRoomUserByRoomIdAndUserId(roomId, userId);
+        if(roomUser1!=null){
+            return roomUser1;
+        }
         int id = 1;
         List<RoomUser> roomUsers = new DataUtil<RoomUser>().readFromFile(ROOM_USER_FILE_PATH,RoomUser.class);
         if(roomUsers.size()>0){
@@ -139,6 +148,21 @@ public class RoomUserService {
         roomUser.setRoomUserId(id+"");
         new DataUtil<RoomUser>().writeToFile(ROOM_USER_FILE_PATH, roomUser);
         return roomUser;
+    }
+
+    public RoomUser getRoomUserByRoomIdAndUserId(String roomId, String userId){
+        RoomUser result = null;
+        List<RoomUser> roomUsers = new DataUtil<RoomUser>().readFromFile(ROOM_USER_FILE_PATH,RoomUser.class);
+        if(roomUsers.size()>0){
+            for (int i = 0; i < roomUsers.size(); i++) {
+                RoomUser roomUser = roomUsers.get(i);
+                if(roomUser.getRoomId().equals(roomId) && roomUser.getUserId().equals(userId)){
+                    result = roomUser;
+                    return result;
+                }
+            }
+        }
+        return result;
     }
 
 }

@@ -91,7 +91,7 @@ public class SendThread extends Thread{
             }
         }else {
             if(StringUtils.isEmpty(SocketClient.CHOOSE_NO)) {
-                System.out.println("选择序号(按#键加Enter返回到此选择)：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2] + " 3." + SocketUtil.ACTIONS[8] + " 4." + SocketUtil.ACTIONS[9] + " 5." + SocketUtil.ACTIONS[10]);
+                System.out.println("选择序号(按#键加Enter返回到此选择)：" + SocketUtil.LINE_SEPARATOR + " 0." + SocketUtil.ACTIONS[0] + SocketUtil.LINE_SEPARATOR + " 1." + SocketUtil.ACTIONS[1] + SocketUtil.LINE_SEPARATOR + " 2." + SocketUtil.ACTIONS[2] + SocketUtil.LINE_SEPARATOR + " 3." + SocketUtil.ACTIONS[8] + SocketUtil.LINE_SEPARATOR + " 4." + SocketUtil.ACTIONS[9] + SocketUtil.LINE_SEPARATOR + " 5." + SocketUtil.ACTIONS[10] + SocketUtil.LINE_SEPARATOR + " 6." + SocketUtil.ACTIONS[12]);
                 SocketClient.CHOOSE_NO = scanner.next();
             }
             switch (SocketClient.CHOOSE_NO) {
@@ -151,6 +151,26 @@ public class SendThread extends Thread{
                     }
                     //check room
                     messageInfo = checkRoom(roomId);
+                    break;
+                case "6":
+                    System.out.println("输入待加入聊天室的Id：");
+                    String roomIdToAdd = scanner.next();
+                    if (roomIdToAdd.equals("#")) {
+                        init();
+                        return null;
+                    }
+                    System.out.println("输入新加入的用户名,用户名之间用英文逗号分开：");
+                    String userIdsToAddStr = scanner.next();
+                    if (userIdsToAddStr.equals("#")) {
+                        init();
+                        return null;
+                    }
+                    String[] userIdsToAdd = userIdsToAddStr.split(",");
+                    messageInfo = new MessageInfo();
+                    messageInfo.setUserId(SocketClient.USER_ID);
+                    messageInfo.setUserIds(userIdsToAdd);
+                    messageInfo.setRoomId(roomIdToAdd);
+                    messageInfo.setAction(SocketUtil.ACTIONS[12]);
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");

@@ -74,7 +74,7 @@ public class ReceiveThread extends Thread{
                     }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[8])){
                         System.out.println(messageInfo.getMessageContent());
                         SocketClient.IS_RESPONSE = "true";
-                    }else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[9])){
+                    }else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[9])){
                         SocketClient.ACTION = null;
                         System.out.println(messageInfo.getMessageContent());
                         SocketClient.CHOOSE_NO = "5";
@@ -90,6 +90,9 @@ public class ReceiveThread extends Thread{
                             SocketClient.ROOM_EXIST = "true";
                             SocketClient.ROOM_ID = roomId;
                         }
+                        SocketClient.IS_RESPONSE = "true";
+                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[12])){
+                        System.out.println(messageInfo.getMessageContent());
                         SocketClient.IS_RESPONSE = "true";
                     } else {
                         System.out.println(messageInfo.getMessageContent());
