@@ -17,6 +17,7 @@ public class SocketClient {
     public static String ROOM_ID = null;
     public static String USER_ID = null;
     public static String USER_EXIST = null;
+    public static String ROOM_EXIST = null;
     public static String IS_RESPONSE = null;
     public static SendThread sendThread = null;
     public static ReceiveThread receiveThread = null;

@@ -3,11 +3,13 @@ package com.ls.socket.server;
 import com.google.gson.Gson;
 import com.ls.socket.entity.ChatRoom;
 import com.ls.socket.entity.MessageInfo;
+import com.ls.socket.entity.RoomUser;
 import com.ls.socket.entity.User;
 import com.ls.socket.service.MessageInfoService;
 import com.ls.socket.service.RoomUserService;
 import com.ls.socket.service.UserService;
 import com.ls.socket.util.SocketUtil;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -86,6 +88,10 @@ public class ServerThread extends Thread {
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
                         checkUser(messageInfo);
                     }
+                    //检查聊天室是否存在
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[11])){
+                        checkRoom(messageInfo);
+                    }
                     //展示未读聊天室历史记录
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
                        showUnreadRoomHistory(messageInfo);
@@ -101,6 +107,14 @@ public class ServerThread extends Thread {
                     //如果客户端是查看在线用户，返回在线用户给客户端
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[2])){
                         viewUsersOnline(messageInfo);
+                    }
+                    //如果是创建聊天室
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[8])){
+                        createRoom(messageInfo);
+                    }
+                    //如果是查看聊天室列表
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[9])){
+                        viewRoomsList(messageInfo);
                     }
                     //心跳检测
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[4])){
@@ -170,6 +184,15 @@ public class ServerThread extends Thread {
                 roomId = room.getRoomId();
             }
             messageInfo.setRoomId(roomId);
+        }
+        out(new Gson().toJson(messageInfo), socketId);
+    }
+
+    //check room is exist
+    public void checkRoom(MessageInfo messageInfo){
+        ChatRoom room = new RoomUserService().getRoomByRoomId(messageInfo.getRoomId());
+        if(room == null){
+            messageInfo.setRoomId(null);
         }
         out(new Gson().toJson(messageInfo), socketId);
     }
@@ -288,5 +311,64 @@ public class ServerThread extends Thread {
         String heartBeatMessage = messageInfo.getMessageContent();
         System.out.println(userId + ":" + heartBeatMessage);
 //        out(new Gson().toJson(messageInfo),socketId);
+    }
+
+    public void createRoom(MessageInfo messageInfo){
+        String message = "";
+        String[] userIds = messageInfo.getUserIds();
+        if(!ArrayUtils.isEmpty(userIds)){
+            RoomUserService roomUserService = new RoomUserService();
+            ChatRoom room = new ChatRoom();
+            room.setRoomType(ChatRoom.CHAT_TYPE_GROUP);
+            room = roomUserService.saveRoom(room);
+            message += "聊天室创建成功!";
+            String roomId = room.getRoomId();
+            RoomUser roomUser = new RoomUser();
+            //将创建者加入聊天室
+            roomUser.setUserId(messageInfo.getUserId());
+            roomUser.setRoomId(roomId);
+            roomUserService.saveRoomUser(roomUser);
+            message += "当前用户" + messageInfo.getUserId() + "成功加入；";
+            for (int i = 0; i < userIds.length; i++) {
+                String userId = userIds[i];
+                boolean userIsExist = new UserService().checkUserIsExist(userId);
+                if(userIsExist){
+                    roomUser = new RoomUser();
+                    roomUser.setRoomId(roomId);
+                    roomUser.setUserId(userId);
+                    roomUserService.saveRoomUser(roomUser);
+                    message += "用户" + userId + "成功加入；";
+                }else{
+                    message += "用户" + userId + "不存在!";
+                }
+            }
+            messageInfo.setMessageContent(message);
+            out(new Gson().toJson(messageInfo), socketId);
+        }
+    }
+
+    public void viewRoomsList(MessageInfo messageInfo){
+        String roomInfoStr = "";
+        RoomUserService roomUserService = new RoomUserService();
+        List<ChatRoom> chatRooms = roomUserService.getChatRomsByUserId(messageInfo.getUserId());
+        if(chatRooms != null && chatRooms.size()>0)
+        for (int i = 0; i < chatRooms.size(); i++) {
+            ChatRoom room = chatRooms.get(i);
+            roomInfoStr += "roomId:" + room.getRoomId();
+            List<String> userIds = roomUserService.getUserIdsByRoomId(room.getRoomId());
+            if(userIds != null && userIds.size()>0) {
+                roomInfoStr += "(";
+                for (int j = 0; j < userIds.size(); j++) {
+                    if(j == userIds.size()-1){
+                        roomInfoStr += userIds.get(j);
+                    }else{
+                        roomInfoStr += userIds.get(j) + ",";
+                    }
+                }
+                roomInfoStr += ")" + SocketUtil.LINE_SEPARATOR;
+            }
+        }
+        messageInfo.setMessageContent(roomInfoStr);
+        out(new Gson().toJson(messageInfo), socketId);
     }
 }

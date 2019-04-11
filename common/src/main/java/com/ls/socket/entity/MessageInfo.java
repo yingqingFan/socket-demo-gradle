@@ -2,6 +2,7 @@ package com.ls.socket.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class MessageInfo implements Serializable {
     private static final long serialVersionUID = 3116836935624567198L;
@@ -20,6 +21,8 @@ public class MessageInfo implements Serializable {
     private String messageMarkId;
     //对方的用户名（主要用来检查用户是否存在和查询与用户间历史记录）
     private String checkUserId;
+    //创建多人聊天的用户名
+    private String[] userIds;
     public String getMessageId() {
         return messageId;
     }
@@ -82,5 +85,13 @@ public class MessageInfo implements Serializable {
 
     public void setCheckUserId(String checkUserId) {
         this.checkUserId = checkUserId;
+    }
+
+    public String[] getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(String[] userIds) {
+        this.userIds = userIds;
     }
 }

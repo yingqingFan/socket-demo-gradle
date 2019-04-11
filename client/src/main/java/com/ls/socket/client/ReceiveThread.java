@@ -42,7 +42,7 @@ public class ReceiveThread extends Thread{
                                 new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                             }
                         }
-                    } else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]))){
+                    }else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]))){
                         SocketClient.ACTION = null;
                         System.out.println(messageInfo.getMessageContent());
                         saveMessageReadMarkByMessageInfo(messageInfo);
@@ -70,6 +70,26 @@ public class ReceiveThread extends Thread{
                     }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
                         System.out.println(messageInfo.getMessageContent());
                         saveMessageReadMarkByMessageInfo(messageInfo);
+                        SocketClient.IS_RESPONSE = "true";
+                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[8])){
+                        System.out.println(messageInfo.getMessageContent());
+                        SocketClient.IS_RESPONSE = "true";
+                    }else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[9])){
+                        SocketClient.ACTION = null;
+                        System.out.println(messageInfo.getMessageContent());
+                        SocketClient.CHOOSE_NO = "5";
+                        SocketClient.IS_RESPONSE = "true";
+                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[11])){
+                        if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {
+                            System.out.println(messageInfo.getMessageContent());
+                        }
+                        String roomId = messageInfo.getRoomId();
+                        if(StringUtils.isEmpty(roomId)){
+                            SocketClient.ROOM_EXIST = "false";
+                        }else{
+                            SocketClient.ROOM_EXIST = "true";
+                            SocketClient.ROOM_ID = roomId;
+                        }
                         SocketClient.IS_RESPONSE = "true";
                     } else {
                         System.out.println(messageInfo.getMessageContent());

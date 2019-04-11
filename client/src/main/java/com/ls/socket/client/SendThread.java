@@ -60,6 +60,29 @@ public class SendThread extends Thread{
         Scanner scanner = new Scanner(System.in);
         if(SocketClient.ACTION != null){
             if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[7])){
+                if(SocketClient.USER_EXIST != null) {
+                    if (SocketClient.USER_EXIST.equals("true")) {
+                        messageInfo = showUnReadRoomHistory();
+                        SocketClient.USER_EXIST = null;
+                    } else {
+                        System.out.println("用户不存在");
+                        init();
+                        SocketClient.CHOOSE_NO = "0";
+                        return null;
+                    }
+                }
+                if(SocketClient.ROOM_EXIST != null) {
+                    if (SocketClient.ROOM_EXIST.equals("true")) {
+                        messageInfo = showUnReadRoomHistory();
+                        SocketClient.ROOM_EXIST = null;
+                    } else {
+                        System.out.println("聊天室不存在");
+                        init();
+                        SocketClient.CHOOSE_NO = "5";
+                        return null;
+                    }
+                }
+            }else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[10])){
                 messageInfo = showUnReadRoomHistory();
             } else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[0])){
                 messageInfo = completeSendMessageInfoByRoomId(SocketClient.ROOM_ID);
@@ -68,7 +91,7 @@ public class SendThread extends Thread{
             }
         }else {
             if(StringUtils.isEmpty(SocketClient.CHOOSE_NO)) {
-                System.out.println("选择序号(按#键加Enter返回到此选择)：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2]);
+                System.out.println("选择序号(按#键加Enter返回到此选择)：0." + SocketUtil.ACTIONS[0] + " 1." + SocketUtil.ACTIONS[1] + " 2." + SocketUtil.ACTIONS[2] + " 3." + SocketUtil.ACTIONS[8] + " 4." + SocketUtil.ACTIONS[9] + " 5." + SocketUtil.ACTIONS[10]);
                 SocketClient.CHOOSE_NO = scanner.next();
             }
             switch (SocketClient.CHOOSE_NO) {
@@ -108,6 +131,35 @@ public class SendThread extends Thread{
                     messageInfo.setAction(SocketUtil.ACTIONS[2]);
                     SocketClient.ACTION = SocketUtil.ACTIONS[2];
                     break;
+                case "3":
+                    System.out.println("创建聊天室（输入聊天室成员用户名,用户名之间用英文逗号分开：）");
+                    String userIdsStr = scanner.next();
+                    if (userIdsStr.equals("#")) {
+                        init();
+                        return null;
+                    }
+                    String[] userIds = userIdsStr.split(",");
+                    messageInfo = new MessageInfo();
+                    messageInfo.setUserId(SocketClient.USER_ID);
+                    messageInfo.setUserIds(userIds);
+                    messageInfo.setAction(SocketUtil.ACTIONS[8]);
+                    break;
+                case "4":
+                    messageInfo = new MessageInfo();
+                    messageInfo.setUserId(SocketClient.USER_ID);
+                    messageInfo.setAction(SocketUtil.ACTIONS[9]);
+                    break;
+                case "5":
+                    SocketClient.ACTION = SocketUtil.ACTIONS[7];
+                    System.out.println("请输入roomId(按Enter键发送消息):");
+                    String roomId = scanner.next();
+                    if (roomId.equals("#")) {
+                        init();
+                        return null;
+                    }
+                    //check room
+                    messageInfo = checkRoom(roomId);
+                    break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
                     init();
@@ -125,34 +177,34 @@ public class SendThread extends Thread{
         return messageInfo;
     }
 
+    public MessageInfo checkRoom(String roomId){
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setAction(SocketUtil.ACTIONS[11]);
+        messageInfo.setRoomId(roomId);
+        messageInfo.setUserId(SocketClient.USER_ID);
+        return messageInfo;
+    }
+
     public MessageInfo showUnReadRoomHistory(){
-        if(SocketClient.USER_EXIST.equals("true")){
-            System.out.println("提示：已进入聊天室（光标处输入想要发送的消息，按Enter键发送）");
-            MessageReadMarkService messageReadMarkService = new MessageReadMarkService();
-            MessageReadMark messageReadMark = messageReadMarkService.getMessageReadMarkByRoomId(SocketClient.ROOM_ID);
-            if (messageReadMark == null) {
-                messageReadMark = new MessageReadMark();
-                String messageMarkId = "0";
-                messageReadMark.setRoomId(SocketClient.ROOM_ID);
-                messageReadMark.setMessageId(messageMarkId);
-                messageReadMarkService.saveMessageReadMark(messageReadMark);
-            }
-            //获取记录读取标记
-            String messageMarkId = messageReadMark.getMessageId();
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setAction(SocketUtil.ACTIONS[7]);
-            messageInfo.setRoomId(SocketClient.ROOM_ID);
-            messageInfo.setMessageMarkId(messageMarkId);
-            messageInfo.setUserId(SocketClient.USER_ID);
-            SocketClient.ACTION = SocketUtil.ACTIONS[0];
-            SocketClient.USER_EXIST = null;
-            return messageInfo;
-        }else{
-            System.out.println("用户不存在");
-            init();
-            SocketClient.CHOOSE_NO = "0";
-            return null;
+        System.out.println("提示：已进入聊天室（光标处输入想要发送的消息，按Enter键发送）");
+        MessageReadMarkService messageReadMarkService = new MessageReadMarkService();
+        MessageReadMark messageReadMark = messageReadMarkService.getMessageReadMarkByRoomId(SocketClient.ROOM_ID);
+        if (messageReadMark == null) {
+            messageReadMark = new MessageReadMark();
+            String messageMarkId = "0";
+            messageReadMark.setRoomId(SocketClient.ROOM_ID);
+            messageReadMark.setMessageId(messageMarkId);
+            messageReadMarkService.saveMessageReadMark(messageReadMark);
         }
+        //获取记录读取标记
+        String messageMarkId = messageReadMark.getMessageId();
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setAction(SocketUtil.ACTIONS[7]);
+        messageInfo.setRoomId(SocketClient.ROOM_ID);
+        messageInfo.setMessageMarkId(messageMarkId);
+        messageInfo.setUserId(SocketClient.USER_ID);
+        SocketClient.ACTION = SocketUtil.ACTIONS[0];
+        return messageInfo;
     }
 
     public MessageInfo showUserHistory(){

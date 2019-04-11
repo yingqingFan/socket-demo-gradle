@@ -24,15 +24,19 @@ public class RoomUserService {
         return userIds;
     }
 
-    public List<String> getChatRomIdsByUserId(String userId){
+    public List<String> getChatRomIdsByUserIdAndRoomType(String userId, String roomType){
         List<String> roomIds = new ArrayList<String>();
         List<RoomUser> roomUsers = new DataUtil<RoomUser>().readFromFile(ROOM_USER_FILE_PATH,RoomUser.class);
         if(roomUsers != null && roomUsers.size() > 0){
             for(int i = 0; i < roomUsers.size(); i++){
                 if(roomUsers.get(i) != null) {
                     if(!StringUtils.isEmpty(roomUsers.get(i).getUserId())) {
-                        if (roomUsers.get(i).getUserId().equals(userId)) {
-                            roomIds.add(roomUsers.get(i).getRoomId());
+                        String roomId = roomUsers.get(i).getRoomId();
+                        ChatRoom room = getRoomByRoomId(roomId);
+                        if(room.getRoomType().equals(roomType)) {
+                            if (roomUsers.get(i).getUserId().equals(userId)) {
+                                roomIds.add(roomId);
+                            }
                         }
                     }
                 }
@@ -48,9 +52,9 @@ public class RoomUserService {
             for(int i = 0; i < roomUsers.size(); i++){
                 if(roomUsers.get(i) != null) {
                     if (!StringUtils.isEmpty(roomUsers.get(i).getUserId())) {
+                        String roomId = roomUsers.get(i).getRoomId();
+                        ChatRoom room = getRoomByRoomId(roomId);
                         if (roomUsers.get(i).getUserId().equals(userId)) {
-                            String roomId = roomUsers.get(i).getRoomId();
-                            ChatRoom room = getRoomByRoomId(roomId);
                             rooms.add(room);
                         }
                     }
@@ -75,8 +79,8 @@ public class RoomUserService {
     public String getSingleRoomIdByUserIds(String id1, String id2){
         String roomId = null;
         //获取共同的roomId
-        List<String> roomIds1 = getChatRomIdsByUserId(id1);
-        List<String> roomIds2 = getChatRomIdsByUserId(id2);
+        List<String> roomIds1 = getChatRomIdsByUserIdAndRoomType(id1,ChatRoom.CHAT_TYPE_SINGLE);
+        List<String> roomIds2 = getChatRomIdsByUserIdAndRoomType(id2,ChatRoom.CHAT_TYPE_SINGLE);
         List<String> exists = new ArrayList<String>(roomIds1);
         List<String> notexists = new ArrayList<String>(roomIds1);
         //roomIds1去除相同的值,exists结果为不同的值
