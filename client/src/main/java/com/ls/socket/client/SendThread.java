@@ -85,12 +85,21 @@ public class SendThread extends Thread{
                     break;
                 case "1":
                     SocketClient.ACTION = SocketUtil.ACTIONS[1];
+                    String userId = null;
                     System.out.println("请输入对方用户名：");
-                    String userId = scanner.next();
+                    userId = scanner.next();
                     if (userId.equals("#")) {
                         init();
                         return null;
                     }
+                   while(userId.equals(SocketClient.USER_ID)){
+                       System.out.println("用户名不能为自己的用户名，请输入对方用户名：");
+                       userId = scanner.next();
+                       if (userId.equals("#")) {
+                           init();
+                           return null;
+                       }
+                   }
                     //check user
                     messageInfo = checkUser(userId);
                     break;
