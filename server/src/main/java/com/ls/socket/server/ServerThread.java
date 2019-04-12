@@ -335,7 +335,7 @@ public class ServerThread extends Thread {
             ChatRoom room = new ChatRoom();
             room.setRoomType(ChatRoom.CHAT_TYPE_GROUP);
             room = roomUserService.saveRoom(room);
-            message += "聊天室创建成功!";
+            message += "聊天室创建成功!聊天室id为'"+ room.getRoomId() + "'! ";
             String roomId = room.getRoomId();
             RoomUser roomUser = new RoomUser();
             //将创建者加入聊天室
