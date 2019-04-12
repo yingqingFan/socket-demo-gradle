@@ -16,8 +16,8 @@ public class SocketClient {
     public static String ACTION = null;
     public static String ROOM_ID = null;
     public static String USER_ID = null;
-    public static String USER_EXIST = null;
-    public static String ROOM_EXIST = null;
+    public static String USER_CHECK = null;
+    public static String ROOM_CHECK = null;
     public static String IS_RESPONSE = null;
     public static SendThread sendThread = null;
     public static ReceiveThread receiveThread = null;
@@ -40,7 +40,7 @@ public class SocketClient {
             sendMessage(socket);
         }
         //检测重连
-        new HeartBeatThread(socket, ip, port).start();
+//        new HeartBeatThread(socket, ip, port).start();
     }
 
     public static Socket initClient(String ip, int port){

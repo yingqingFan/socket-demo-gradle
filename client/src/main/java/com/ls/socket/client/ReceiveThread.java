@@ -42,7 +42,7 @@ public class ReceiveThread extends Thread{
                                 new MessageReadMarkService().saveMessageReadMark(messageReadMark);
                             }
                         }
-                    }else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]))){
+                    }else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[13]))){
                         SocketClient.ACTION = null;
                         System.out.println(messageInfo.getMessageContent());
                         saveMessageReadMarkByMessageInfo(messageInfo);
@@ -58,9 +58,9 @@ public class ReceiveThread extends Thread{
                         }
                         String roomId = messageInfo.getRoomId();
                         if(StringUtils.isEmpty(roomId)){
-                            SocketClient.USER_EXIST = "false";
+                            SocketClient.USER_CHECK = "false";
                         }else{
-                            SocketClient.USER_EXIST = "true";
+                            SocketClient.USER_CHECK = "true";
                             SocketClient.ROOM_ID = roomId;
                         }
                         SocketClient.IS_RESPONSE = "true";
@@ -85,9 +85,9 @@ public class ReceiveThread extends Thread{
                         }
                         String roomId = messageInfo.getRoomId();
                         if(StringUtils.isEmpty(roomId)){
-                            SocketClient.ROOM_EXIST = "false";
+                            SocketClient.ROOM_CHECK = "false";
                         }else{
-                            SocketClient.ROOM_EXIST = "true";
+                            SocketClient.ROOM_CHECK = "true";
                             SocketClient.ROOM_ID = roomId;
                         }
                         SocketClient.IS_RESPONSE = "true";

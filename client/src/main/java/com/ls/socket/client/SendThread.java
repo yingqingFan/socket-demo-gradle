@@ -26,7 +26,7 @@ public class SendThread extends Thread{
     public void run() {
         try {
             writer = new PrintWriter(socket.getOutputStream());
-            SocketClient.IS_RESPONSE = "Y";
+            SocketClient.IS_RESPONSE = "true";
             while (true) {
                 MessageInfo messageInfo = initMessageInfo();
                 if (messageInfo == null) {
@@ -53,17 +53,18 @@ public class SendThread extends Thread{
     }
 
     public MessageInfo initMessageInfo(){
-        if(SocketClient.ACTION == null || !SocketClient.ACTION.equals(SocketUtil.ACTIONS[0])){
+        if(SocketClient.ACTION == null || !(SocketClient.ACTION.equals(SocketUtil.ACTIONS[0]) || SocketClient.ACTION.equals(SocketUtil.ACTIONS[10]))){
             waitResponse();
         }
         MessageInfo messageInfo = null;
         Scanner scanner = new Scanner(System.in);
         if(SocketClient.ACTION != null){
             if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[7])){
-                if(SocketClient.USER_EXIST != null) {
-                    if (SocketClient.USER_EXIST.equals("true")) {
+                if(SocketClient.USER_CHECK != null) {
+                    if (SocketClient.USER_CHECK.equals("true")) {
                         messageInfo = showUnReadRoomHistory();
-                        SocketClient.USER_EXIST = null;
+                        SocketClient.ACTION = SocketUtil.ACTIONS[0];
+                        SocketClient.USER_CHECK = null;
                     } else {
                         System.out.println("用户不存在");
                         init();
@@ -71,27 +72,28 @@ public class SendThread extends Thread{
                         return null;
                     }
                 }
-                if(SocketClient.ROOM_EXIST != null) {
-                    if (SocketClient.ROOM_EXIST.equals("true")) {
+                if(SocketClient.ROOM_CHECK != null) {
+                    if (SocketClient.ROOM_CHECK.equals("true")) {
                         messageInfo = showUnReadRoomHistory();
-                        SocketClient.ROOM_EXIST = null;
+                        SocketClient.ACTION = SocketUtil.ACTIONS[10];
+                        SocketClient.ROOM_CHECK = null;
                     } else {
-                        System.out.println("聊天室不存在");
+                        System.out.println("群聊聊天室不存在或当前用户不在此聊天群中");
                         init();
                         SocketClient.CHOOSE_NO = "5";
                         return null;
                     }
                 }
-            }else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[10])){
-                messageInfo = showUnReadRoomHistory();
-            } else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[0])){
+            } else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[0]) || SocketClient.ACTION.equals(SocketUtil.ACTIONS[10])){
                 messageInfo = completeSendMessageInfoByRoomId(SocketClient.ROOM_ID);
             }else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[1])){
                 messageInfo = showUserHistory();
+            }else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[13])){
+                messageInfo = showGroupRoomHistory();
             }
         }else {
             if(StringUtils.isEmpty(SocketClient.CHOOSE_NO)) {
-                System.out.println("选择序号(按#键加Enter返回到此选择)：" + SocketUtil.LINE_SEPARATOR + " 0." + SocketUtil.ACTIONS[0] + SocketUtil.LINE_SEPARATOR + " 1." + SocketUtil.ACTIONS[1] + SocketUtil.LINE_SEPARATOR + " 2." + SocketUtil.ACTIONS[2] + SocketUtil.LINE_SEPARATOR + " 3." + SocketUtil.ACTIONS[8] + SocketUtil.LINE_SEPARATOR + " 4." + SocketUtil.ACTIONS[9] + SocketUtil.LINE_SEPARATOR + " 5." + SocketUtil.ACTIONS[10] + SocketUtil.LINE_SEPARATOR + " 6." + SocketUtil.ACTIONS[12]);
+                System.out.println("选择序号(按#键加Enter返回到此选择)：" + SocketUtil.LINE_SEPARATOR + " 0." + SocketUtil.ACTIONS[0] + SocketUtil.LINE_SEPARATOR + " 1." + SocketUtil.ACTIONS[1] + SocketUtil.LINE_SEPARATOR + " 2." + SocketUtil.ACTIONS[2] + SocketUtil.LINE_SEPARATOR + " 3." + SocketUtil.ACTIONS[8] + SocketUtil.LINE_SEPARATOR + " 4." + SocketUtil.ACTIONS[9] + SocketUtil.LINE_SEPARATOR + " 5." + SocketUtil.ACTIONS[10] + SocketUtil.LINE_SEPARATOR + " 6." + SocketUtil.ACTIONS[12] + SocketUtil.LINE_SEPARATOR + " 7." + SocketUtil.ACTIONS[13]);
                 SocketClient.CHOOSE_NO = scanner.next();
             }
             switch (SocketClient.CHOOSE_NO) {
@@ -153,7 +155,7 @@ public class SendThread extends Thread{
                     messageInfo = checkRoom(roomId);
                     break;
                 case "6":
-                    System.out.println("输入待加入聊天室的Id：");
+                    System.out.println("输入你想添加成员的聊天室id(你必须是群成员)：");
                     String roomIdToAdd = scanner.next();
                     if (roomIdToAdd.equals("#")) {
                         init();
@@ -171,6 +173,18 @@ public class SendThread extends Thread{
                     messageInfo.setUserIds(userIdsToAdd);
                     messageInfo.setRoomId(roomIdToAdd);
                     messageInfo.setAction(SocketUtil.ACTIONS[12]);
+                    break;
+                case "7":
+                    SocketClient.ACTION = SocketUtil.ACTIONS[13];
+                    String roomId1 = null;
+                    System.out.println("请输入聊天室id：");
+                    roomId1 = scanner.next();
+                    if (roomId1.equals("#")) {
+                        init();
+                        return null;
+                    }
+                    //check room
+                    messageInfo = checkRoom(roomId1);
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
@@ -224,20 +238,33 @@ public class SendThread extends Thread{
         messageInfo.setRoomId(SocketClient.ROOM_ID);
         messageInfo.setMessageMarkId(messageMarkId);
         messageInfo.setUserId(SocketClient.USER_ID);
-        SocketClient.ACTION = SocketUtil.ACTIONS[0];
         return messageInfo;
     }
 
     public MessageInfo showUserHistory(){
-        if(SocketClient.USER_EXIST.equals("true")) {
+        if(SocketClient.USER_CHECK.equals("true")) {
             MessageInfo messageInfo =completeViewHistoryMessageInfoByRoomId(SocketClient.ROOM_ID);
-            SocketClient.USER_EXIST = null;
+            SocketClient.USER_CHECK = null;
             SocketClient.ACTION = null;
             return messageInfo;
         }else{
             System.out.println("用户不存在");
             init();
             SocketClient.CHOOSE_NO = "1";
+            return null;
+        }
+    }
+
+    public MessageInfo showGroupRoomHistory(){
+        if(SocketClient.ROOM_CHECK.equals("true")) {
+            MessageInfo messageInfo =completeViewHistoryMessageInfoByRoomId(SocketClient.ROOM_ID);
+            SocketClient.ROOM_CHECK = null;
+            SocketClient.ACTION = null;
+            return messageInfo;
+        }else{
+            System.out.println("群聊聊天室不存在或当前用户不在此聊天群中");
+            init();
+            SocketClient.CHOOSE_NO = "7";
             return null;
         }
     }

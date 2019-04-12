@@ -97,11 +97,11 @@ public class ServerThread extends Thread {
                        showUnreadRoomHistory(messageInfo);
                     }
                     //发送消息
-                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[0])) {
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[0]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[10])) {
                         sendMessage(messageInfo);
                     }
                     //如果客户端是查看聊天历史记录，返回历史记录给客户端
-                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[1])){
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[1]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[13])){
                        outHistoryToClient(messageInfo);
                     }
                     //如果客户端是查看在线用户，返回在线用户给客户端
@@ -192,13 +192,21 @@ public class ServerThread extends Thread {
         out(new Gson().toJson(messageInfo), socketId);
     }
 
-    //检查群聊聊天室是否存在
+    //检查群聊聊天室是否存在且用户是否属于群聊成员
     public void checkRoom(MessageInfo messageInfo){
-        ChatRoom room = new RoomUserService().getRoomByRoomId(messageInfo.getRoomId());
+        RoomUserService roomUserService = new RoomUserService();
+        ChatRoom room = roomUserService.getRoomByRoomId(messageInfo.getRoomId());
         if(room == null){
             messageInfo.setRoomId(null);
-        }else if(room.getRoomType().equals(ChatRoom.CHAT_TYPE_SINGLE)){
-            messageInfo.setRoomId(null);
+        }else {
+            if (room.getRoomType().equals(ChatRoom.CHAT_TYPE_SINGLE)) {
+                messageInfo.setRoomId(null);
+            }else{
+                List<String> userIds = roomUserService.getUserIdsByRoomId(room.getRoomId());
+                if(!userIds.contains(messageInfo.getUserId())){
+                    messageInfo.setRoomId(null);
+                }
+            }
         }
         out(new Gson().toJson(messageInfo), socketId);
     }
@@ -339,11 +347,13 @@ public class ServerThread extends Thread {
                 String userId = userIds[i];
                 boolean userIsExist = new UserService().checkUserIsExist(userId);
                 if(userIsExist){
-                    roomUser = new RoomUser();
-                    roomUser.setRoomId(roomId);
-                    roomUser.setUserId(userId);
-                    roomUserService.saveRoomUser(roomUser);
-                    message += "用户" + userId + "成功加入；";
+                    if(!messageInfo.getUserId().equals(userId)){
+                        roomUser = new RoomUser();
+                        roomUser.setRoomId(roomId);
+                        roomUser.setUserId(userId);
+                        roomUserService.saveRoomUser(roomUser);
+                        message += "用户" + userId + "成功加入；";
+                    }
                 }else{
                     message += "用户" + userId + "不存在!";
                 }
@@ -391,24 +401,34 @@ public class ServerThread extends Thread {
         RoomUserService roomUserService = new RoomUserService();
         ChatRoom room = roomUserService.getRoomByRoomId(roomId);
         if(room != null && !room.getRoomType().equals(ChatRoom.CHAT_TYPE_SINGLE)) {
-            String[] userIds = messageInfo.getUserIds();
-            if (!ArrayUtils.isEmpty(userIds)) {
-                for (int i = 0; i < userIds.length; i++) {
-                    String userId = userIds[i];
-                    boolean userIsExist = new UserService().checkUserIsExist(userId);
-                    if (userIsExist) {
-                        RoomUser roomUser = new RoomUser();
-                        roomUser.setRoomId(roomId);
-                        roomUser.setUserId(userId);
-                        roomUserService.saveRoomUser(roomUser);
-                        message += "用户" + userId + "成功加入；";
-                    } else {
-                        message += "用户" + userId + "不存在!";
+            List<String> userIdsIn = roomUserService.getUserIdsByRoomId(room.getRoomId());
+            if(userIdsIn.contains(messageInfo.getUserId())) {
+                String[] userIds = messageInfo.getUserIds();
+                if (!ArrayUtils.isEmpty(userIds)) {
+                    for (int i = 0; i < userIds.length; i++) {
+                        String userId = userIds[i];
+                        boolean userIsExist = new UserService().checkUserIsExist(userId);
+                        if (userIsExist) {
+                            RoomUser roomUser = roomUserService.getRoomUserByRoomIdAndUserId(roomId, userId);
+                            if(roomUser != null){
+                                message += "用户" + userId + "已在聊天群中；";
+                            }else{
+                                RoomUser roomUser1 = new RoomUser();
+                                roomUser.setRoomId(roomId);
+                                roomUser.setUserId(userId);
+                                roomUserService.saveRoomUser(roomUser);
+                                message += "用户" + userId + "成功加入；";
+                            }
+                        } else {
+                            message += "用户" + userId + "不存在!";
+                        }
                     }
                 }
+            }else{
+                message += "群聊聊天室不存在或当前用户不在此聊天群中";
             }
         }else{
-            message += "聊天室" + roomId + "不存在；";
+            message += "群聊聊天室不存在或当前用户不在此聊天群中";
         }
         messageInfo.setMessageContent(message);
         out(new Gson().toJson(messageInfo), socketId);
