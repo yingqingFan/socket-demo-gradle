@@ -6,10 +6,10 @@ import com.ls.socket.util.DataUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class RoomUserService {
-    public static String ROOM_FILE_PATH = null;
     public static String ROOM_USER_FILE_PATH = null;
     public List<String> getUserIdsByRoomId(String roomId){
         List<String> userIds = new ArrayList<String>();
@@ -28,11 +28,12 @@ public class RoomUserService {
         List<String> roomIds = new ArrayList<String>();
         List<RoomUser> roomUsers = new DataUtil<RoomUser>().readFromFile(ROOM_USER_FILE_PATH,RoomUser.class);
         if(roomUsers != null && roomUsers.size() > 0){
+            RoomService roomService = new RoomService();
             for(int i = 0; i < roomUsers.size(); i++){
                 if(roomUsers.get(i) != null) {
                     if(!StringUtils.isEmpty(roomUsers.get(i).getUserId())) {
                         String roomId = roomUsers.get(i).getRoomId();
-                        ChatRoom room = getRoomByRoomId(roomId);
+                        ChatRoom room = roomService.getRoomByRoomId(roomId);
                         if(room.getRoomType().equals(roomType)) {
                             if (roomUsers.get(i).getUserId().equals(userId)) {
                                 roomIds.add(roomId);
@@ -49,11 +50,12 @@ public class RoomUserService {
         List<ChatRoom> rooms = new ArrayList<ChatRoom>();
         List<RoomUser> roomUsers = new DataUtil<RoomUser>().readFromFile(ROOM_USER_FILE_PATH,RoomUser.class);
         if(roomUsers != null && roomUsers.size() > 0){
+            RoomService roomService = new RoomService();
             for(int i = 0; i < roomUsers.size(); i++){
                 if(roomUsers.get(i) != null) {
                     if (!StringUtils.isEmpty(roomUsers.get(i).getUserId())) {
                         String roomId = roomUsers.get(i).getRoomId();
-                        ChatRoom room = getRoomByRoomId(roomId);
+                        ChatRoom room = roomService.getRoomByRoomId(roomId);
                         if (roomUsers.get(i).getUserId().equals(userId)) {
                             rooms.add(room);
                         }
@@ -62,18 +64,6 @@ public class RoomUserService {
             }
         }
         return rooms;
-    }
-
-    public ChatRoom getRoomByRoomId(String roomId){
-        ChatRoom result = null;
-        List<ChatRoom> rooms = new DataUtil<ChatRoom>().readFromFile(ROOM_FILE_PATH,ChatRoom.class);
-        for (int i = 0; i < rooms.size(); i++) {
-            ChatRoom room  = rooms.get(i);
-            if(room.getRoomId().equals(roomId)){
-                result = room;
-            }
-        }
-        return result;
     }
 
     public String getSingleRoomIdByUserIds(String id1, String id2){
@@ -93,37 +83,6 @@ public class RoomUserService {
             roomId = null;
         }
         return roomId;
-    }
-
-    //新建单聊room并绑定用户
-    public ChatRoom createSingleChatRoom(String userId1, String userId2){
-        ChatRoom room = new ChatRoom();
-        room.setRoomType(ChatRoom.CHAT_TYPE_SINGLE);
-        RoomUser roomUser1 = new RoomUser();
-        roomUser1.setUserId(userId1);
-        RoomUser roomUser2 = new RoomUser();
-        roomUser2.setUserId(userId2);
-        //保存room到文件
-        room = saveRoom(room);
-        //保存roomUser到文件
-        roomUser1.setRoomId(room.getRoomId());
-        roomUser2.setRoomId(room.getRoomId());
-        saveRoomUser(roomUser1);
-        saveRoomUser(roomUser2);
-        return room;
-    }
-
-    public synchronized ChatRoom saveRoom(ChatRoom room){
-        int id = 1;
-        List<ChatRoom> chatRooms = new DataUtil<ChatRoom>().readFromFile(ROOM_FILE_PATH,ChatRoom.class);
-        if(chatRooms.size()>0){
-            String latestIdStr = chatRooms.get(chatRooms.size()-1).getRoomId();
-            int latestId = Integer.parseInt(latestIdStr);
-            id = latestId+1;
-        }
-        room.setRoomId(id+"");
-        new DataUtil<ChatRoom>().writeToFile(ROOM_FILE_PATH, room);
-        return room;
     }
 
     public synchronized RoomUser saveRoomUser(RoomUser roomUser){
@@ -146,6 +105,7 @@ public class RoomUserService {
             }
         }
         roomUser.setRoomUserId(id+"");
+        roomUser.setCreateDate(new Date());
         new DataUtil<RoomUser>().writeToFile(ROOM_USER_FILE_PATH, roomUser);
         return roomUser;
     }

@@ -6,6 +6,7 @@ import com.ls.socket.entity.MessageInfo;
 import com.ls.socket.entity.RoomUser;
 import com.ls.socket.entity.User;
 import com.ls.socket.service.MessageInfoService;
+import com.ls.socket.service.RoomService;
 import com.ls.socket.service.RoomUserService;
 import com.ls.socket.service.UserService;
 import com.ls.socket.util.SocketUtil;
@@ -184,7 +185,8 @@ public class ServerThread extends Thread {
             String roomId = roomUserService.getSingleRoomIdByUserIds(messageInfo.getUserId(), messageInfo.getCheckUserId());
             if (roomId == null) {
                 //新建room,并关联用户
-                ChatRoom room = roomUserService.createSingleChatRoom(messageInfo.getUserId(), messageInfo.getCheckUserId());
+                RoomService roomService = new RoomService();
+                ChatRoom room = roomService.createSingleChatRoom(messageInfo.getUserId(), messageInfo.getCheckUserId());
                 roomId = room.getRoomId();
             }
             messageInfo.setRoomId(roomId);
@@ -194,14 +196,15 @@ public class ServerThread extends Thread {
 
     //检查群聊聊天室是否存在且用户是否属于群聊成员
     public void checkRoom(MessageInfo messageInfo){
-        RoomUserService roomUserService = new RoomUserService();
-        ChatRoom room = roomUserService.getRoomByRoomId(messageInfo.getRoomId());
+        RoomService roomService = new RoomService();
+        ChatRoom room = roomService.getRoomByRoomId(messageInfo.getRoomId());
         if(room == null){
             messageInfo.setRoomId(null);
         }else {
             if (room.getRoomType().equals(ChatRoom.CHAT_TYPE_SINGLE)) {
                 messageInfo.setRoomId(null);
             }else{
+                RoomUserService roomUserService = new RoomUserService();
                 List<String> userIds = roomUserService.getUserIdsByRoomId(room.getRoomId());
                 if(!userIds.contains(messageInfo.getUserId())){
                     messageInfo.setRoomId(null);
@@ -212,14 +215,19 @@ public class ServerThread extends Thread {
     }
 
     public void showUnreadRoomHistory(MessageInfo messageInfo){
-        List<MessageInfo> messageInfos = new MessageInfoService().getMessageInfosByRoomId(messageInfo.getRoomId());
+        String roomId = messageInfo.getRoomId();
+        List<MessageInfo> messageInfos = new MessageInfoService().getMessageInfosByRoomId(roomId);
         if (messageInfos.size() > 0) {
             String historyStr = "";
             String messageMarkId = messageInfo.getMessageMarkId();
+            String userId = messageInfo.getUserId();
+            RoomUserService roomUserService = new RoomUserService();
+            RoomUser roomUser = roomUserService.getRoomUserByRoomIdAndUserId(roomId,userId);
             int count = 0;
             for (int i = 0; i < messageInfos.size(); i++) {
                 MessageInfo messageInfo1 = messageInfos.get(i);
-                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && !messageInfo1.getUserId().equals(messageInfo.getUserId())) {
+                //未读标记之后的消息（不包括自己发送的消息且显示的消息都是自己加入聊天室之后的消息）
+                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && !messageInfo1.getUserId().equals(userId) && messageInfo1.getDate().after(roomUser.getCreateDate())) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
                     String dateStr = dateFormat.format(messageInfo1.getDate());
                     String messageStr = dateStr + ": " + messageInfo1.getUserId() + ": " + messageInfo1.getMessageContent();
@@ -273,16 +281,21 @@ public class ServerThread extends Thread {
             for (int i = 0; i < messageHistoryList.size(); i++) {
                 MessageInfo sendHistory = messageHistoryList.get(i);
                 if(sendHistory != null) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
-                    String dateStr = dateFormat.format(sendHistory.getDate());
-                    String sendHistoryUserId = sendHistory.getUserId();
-                    String userId = SocketServer.socketUserMap.get(socketId);
-                    if (sendHistoryUserId.equals(userId)) {
-                        sendHistoryUserId = sendHistoryUserId + "(我)";
+                    String userId = messageInfo.getUserId();
+                    RoomUserService roomUserService = new RoomUserService();
+                    RoomUser roomUser = roomUserService.getRoomUserByRoomIdAndUserId(roomId,userId);
+                    //用户只能查看自己加入之后的聊天信息
+                    if(sendHistory.getDate().after(roomUser.getCreateDate())) {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+                        String dateStr = dateFormat.format(sendHistory.getDate());
+                        String sendHistoryUserId = sendHistory.getUserId();
+                        if (sendHistoryUserId.equals(userId)) {
+                            sendHistoryUserId = sendHistoryUserId + "(我)";
+                        }
+                        String messageStr = dateStr + ": " + sendHistoryUserId + ": " + sendHistory.getMessageContent();
+                        historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
+                        messageInfo.setMessageMarkId(sendHistory.getMessageId());
                     }
-                    String messageStr = dateStr + ": " + sendHistoryUserId + ": " + sendHistory.getMessageContent();
-                    historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
-                    messageInfo.setMessageMarkId(sendHistory.getMessageId());
                 }
             }
             if(!StringUtils.isEmpty(historyStr)){
@@ -331,16 +344,17 @@ public class ServerThread extends Thread {
         String message = "";
         String[] userIds = messageInfo.getUserIds();
         if(!ArrayUtils.isEmpty(userIds)){
-            RoomUserService roomUserService = new RoomUserService();
+            RoomService roomService = new RoomService();
             ChatRoom room = new ChatRoom();
             room.setRoomType(ChatRoom.CHAT_TYPE_GROUP);
-            room = roomUserService.saveRoom(room);
+            room = roomService.saveRoom(room);
             message += "聊天室创建成功!聊天室id为'"+ room.getRoomId() + "'! ";
             String roomId = room.getRoomId();
             RoomUser roomUser = new RoomUser();
             //将创建者加入聊天室
             roomUser.setUserId(messageInfo.getUserId());
             roomUser.setRoomId(roomId);
+            RoomUserService roomUserService = new RoomUserService();
             roomUserService.saveRoomUser(roomUser);
             message += "当前用户" + messageInfo.getUserId() + "成功加入；";
             for (int i = 0; i < userIds.length; i++) {
@@ -398,9 +412,10 @@ public class ServerThread extends Thread {
     public void addUsersToRoom(MessageInfo messageInfo){
         String message = "";
         String roomId = messageInfo.getRoomId();
-        RoomUserService roomUserService = new RoomUserService();
-        ChatRoom room = roomUserService.getRoomByRoomId(roomId);
+        RoomService roomService = new RoomService();
+        ChatRoom room = roomService.getRoomByRoomId(roomId);
         if(room != null && !room.getRoomType().equals(ChatRoom.CHAT_TYPE_SINGLE)) {
+            RoomUserService roomUserService = new RoomUserService();
             List<String> userIdsIn = roomUserService.getUserIdsByRoomId(room.getRoomId());
             if(userIdsIn.contains(messageInfo.getUserId())) {
                 String[] userIds = messageInfo.getUserIds();
@@ -414,9 +429,9 @@ public class ServerThread extends Thread {
                                 message += "用户" + userId + "已在聊天群中；";
                             }else{
                                 RoomUser roomUser1 = new RoomUser();
-                                roomUser.setRoomId(roomId);
-                                roomUser.setUserId(userId);
-                                roomUserService.saveRoomUser(roomUser);
+                                roomUser1.setRoomId(roomId);
+                                roomUser1.setUserId(userId);
+                                roomUserService.saveRoomUser(roomUser1);
                                 message += "用户" + userId + "成功加入；";
                             }
                         } else {

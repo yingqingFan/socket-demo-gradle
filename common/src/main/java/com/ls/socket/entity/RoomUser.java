@@ -1,9 +1,12 @@
 package com.ls.socket.entity;
 
+import java.util.Date;
+
 public class RoomUser {
     private String roomUserId;
     private String roomId;
     private String userId;
+    private Date createDate;
 
     public String getRoomUserId() {
         return roomUserId;
@@ -29,4 +32,11 @@ public class RoomUser {
         this.userId = userId;
     }
 
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
 }

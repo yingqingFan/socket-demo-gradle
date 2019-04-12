@@ -1,6 +1,7 @@
 package com.ls.socket.server;
 
 import com.ls.socket.service.MessageInfoService;
+import com.ls.socket.service.RoomService;
 import com.ls.socket.service.RoomUserService;
 import com.ls.socket.service.UserService;
 import com.ls.socket.util.FileUtil;
@@ -50,11 +51,11 @@ public class SocketServer {
 
     public void initDataFile(String dataPath){
         MessageInfoService.MESSAGE_FILE_PATH = dataPath + "/messageInfo.txt";
-        RoomUserService.ROOM_FILE_PATH = dataPath + "/room.txt";
+        RoomService.ROOM_FILE_PATH = dataPath + "/room.txt";
         RoomUserService.ROOM_USER_FILE_PATH = dataPath + "/roomUser.txt";
         UserService.USER_FILE_PATH = dataPath + "/user.txt";
         FileUtil.createFileIfNotExist(MessageInfoService.MESSAGE_FILE_PATH);
-        FileUtil.createFileIfNotExist(RoomUserService.ROOM_FILE_PATH);
+        FileUtil.createFileIfNotExist(RoomService.ROOM_FILE_PATH);
         FileUtil.createFileIfNotExist(RoomUserService.ROOM_USER_FILE_PATH);
         FileUtil.createFileIfNotExist(UserService.USER_FILE_PATH);
     }
