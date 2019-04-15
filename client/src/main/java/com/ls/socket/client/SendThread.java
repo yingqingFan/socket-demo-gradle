@@ -145,7 +145,7 @@ public class SendThread extends Thread{
                     break;
                 case "5":
                     SocketClient.ACTION = SocketUtil.ACTIONS[7];
-                    System.out.println("请输入roomId(按Enter键发送消息):");
+                    System.out.println("请输入聊天室id(按Enter键发送消息):");
                     String roomId = scanner.next();
                     if (roomId.equals("#")) {
                         init();

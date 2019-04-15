@@ -258,6 +258,8 @@ public class ServerThread extends Thread {
             RoomUserService roomUserService = new RoomUserService();
             List<String> userIds = roomUserService.getUserIdsByRoomId(roomId);
             if(userIds != null && userIds.size()>0){
+                RoomService roomService = new RoomService();
+                ChatRoom room =  roomService.getRoomByRoomId(roomId);
                 for (int i = 0; i < userIds.size(); i++) {
                     if(!userIds.get(i).equals(messageInfo.getUserId())) {
                         String friendSocketId = SocketServer.userSocketMap.get(userIds.get(i));
@@ -266,7 +268,11 @@ public class ServerThread extends Thread {
                             String userId = SocketServer.socketUserMap.get(socketId);
                             messageInfo.setUserId(userId);
                             String message = messageInfo.getMessageContent();
-                            messageInfo.setMessageContent(userId + ":" + message);
+                            if(room.getRoomType().equals(ChatRoom.CHAT_TYPE_GROUP)){
+                                messageInfo.setMessageContent("(聊天群 " + roomId + ")" + userId + ":" + message);
+                            }else {
+                                messageInfo.setMessageContent(userId + ":" + message);
+                            }
                             //发送信息给目标客户端
                             out(new Gson().toJson(messageInfo), friendSocketId);
                         }
