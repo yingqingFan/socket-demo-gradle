@@ -260,6 +260,7 @@ public class ServerThread extends Thread {
             if(userIds != null && userIds.size()>0){
                 RoomService roomService = new RoomService();
                 ChatRoom room =  roomService.getRoomByRoomId(roomId);
+                String message = messageInfo.getMessageContent();
                 for (int i = 0; i < userIds.size(); i++) {
                     if(!userIds.get(i).equals(messageInfo.getUserId())) {
                         String friendSocketId = SocketServer.userSocketMap.get(userIds.get(i));
@@ -267,7 +268,6 @@ public class ServerThread extends Thread {
                         if (socket1 != null) {
                             String userId = SocketServer.socketUserMap.get(socketId);
                             messageInfo.setUserId(userId);
-                            String message = messageInfo.getMessageContent();
                             if(room.getRoomType().equals(ChatRoom.CHAT_TYPE_GROUP)){
                                 messageInfo.setMessageContent("(聊天群 " + roomId + ")" + userId + ":" + message);
                             }else {
