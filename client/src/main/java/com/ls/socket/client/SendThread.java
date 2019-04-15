@@ -308,5 +308,7 @@ public class SendThread extends Thread{
         SocketClient.ROOM_ID = null;
         SocketClient.IS_RESPONSE = "true";
         SocketClient.CHOOSE_NO = null;
+        SocketClient.ROOM_CHECK = null;
+        SocketClient.USER_CHECK = null;
     }
 }
