@@ -32,7 +32,6 @@ public class SendThread extends Thread{
                 if (messageInfo == null) {
                     continue;
                 }
-                messageInfo.setDate(new Date());
                 String str = new Gson().toJson(messageInfo);
                 //发送数据到服务端
                 writer.println(str);

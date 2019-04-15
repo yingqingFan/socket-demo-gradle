@@ -53,4 +53,18 @@ public class RoomService {
         roomUserService.saveRoomUser(roomUser2);
         return room;
     }
+
+    public void deleteRoom(String roomId){
+        DataUtil<ChatRoom> dataUtil = new DataUtil<ChatRoom>();
+        List<ChatRoom> rooms = dataUtil.readFromFile(ROOM_FILE_PATH,ChatRoom.class);
+        dataUtil.clearFile(ROOM_FILE_PATH);
+        if(rooms.size()>0){
+            for (int i = 0; i < rooms.size(); i++) {
+                ChatRoom room = rooms.get(i);
+                if(!(room.getRoomId().equals(roomId))){
+                    dataUtil.writeToFile(ROOM_FILE_PATH, room);
+                }
+            }
+        }
+    }
 }

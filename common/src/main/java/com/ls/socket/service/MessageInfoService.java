@@ -4,6 +4,7 @@ import com.ls.socket.entity.MessageInfo;
 import com.ls.socket.util.DataUtil;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MessageInfoService {
@@ -32,6 +33,7 @@ public class MessageInfoService {
             id = latestId+1;
         }
         messageInfo.setMessageId(id+"");
+        messageInfo.setDate(new Date());
         new DataUtil<MessageInfo>().writeToFile(MESSAGE_FILE_PATH,messageInfo);
         return messageInfo;
     }

@@ -235,14 +235,23 @@ public class ServerThread extends Thread {
             for (int i = 0; i < messageInfos.size(); i++) {
                 MessageInfo messageInfo1 = messageInfos.get(i);
                 //未读标记之后的消息（不包括自己发送的消息且显示的消息都是自己加入聊天室之后的消息）
-                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && !messageInfo1.getUserId().equals(userId) && messageInfo1.getDate().after(roomUser.getCreateDate())) {
+                if (Integer.parseInt(messageInfo1.getMessageId()) > Integer.parseInt(messageMarkId) && messageInfo1.getDate().after(roomUser.getCreateDate())) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
                     String dateStr = dateFormat.format(messageInfo1.getDate());
-                    String messageStr = dateStr + ": " + messageInfo1.getUserId() + ": " + messageInfo1.getMessageContent();
-                    historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
-                    messageMarkId = messageInfo1.getMessageId();
-                    messageInfo.setMessageMarkId(messageMarkId);
-                    count ++;
+                    if(messageInfo1.getUserId() == null){
+                        String messageStr = dateStr + ": " + "系统提示 " + messageInfo1.getMessageContent();
+                        historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
+                        messageMarkId = messageInfo1.getMessageId();
+                        messageInfo.setMessageMarkId(messageMarkId);
+                        count ++;
+                    }else if(!messageInfo1.getUserId().equals(userId)){
+                        String messageStr = dateStr + ": " + messageInfo1.getUserId() + ": " + messageInfo1.getMessageContent();
+                        historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
+                        messageMarkId = messageInfo1.getMessageId();
+                        messageInfo.setMessageMarkId(messageMarkId);
+                        count ++;
+                    }
+
                 }
             }
             if (count>0){
@@ -286,6 +295,33 @@ public class ServerThread extends Thread {
         }
     }
 
+    //群通知
+    public void outMessageToGroupRoom(String roomId,String message){
+        if(roomId != null) {
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setRoomId(roomId);
+            messageInfo.setAction(SocketUtil.ACTIONS[0]);
+            messageInfo.setMessageContent(message);
+            //将messageInfo存入本地文件
+            messageInfo = new MessageInfoService().saveMessageInfo(messageInfo);
+            RoomUserService roomUserService = new RoomUserService();
+            List<String> userIds = roomUserService.getUserIdsByRoomId(roomId);
+            if(userIds != null && userIds.size()>0){
+                for (int i = 0; i < userIds.size(); i++) {
+                    String friendSocketId = SocketServer.userSocketMap.get(userIds.get(i));
+                    Socket socket1 = SocketServer.socketMap.get(friendSocketId);
+                    if (socket1 != null) {
+                        String userId = SocketServer.socketUserMap.get(socketId);
+                        messageInfo.setUserId(userId);
+                        messageInfo.setMessageContent(message);
+                        //发送信息给目标客户端
+                        out(new Gson().toJson(messageInfo), friendSocketId);
+                    }
+                }
+            }
+        }
+    }
+
     public void outHistoryToClient(MessageInfo messageInfo){
         String historyStr = "";
         String roomId = messageInfo.getRoomId();
@@ -303,10 +339,15 @@ public class ServerThread extends Thread {
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
                         String dateStr = dateFormat.format(sendHistory.getDate());
                         String sendHistoryUserId = sendHistory.getUserId();
-                        if (sendHistoryUserId.equals(userId)) {
-                            sendHistoryUserId = sendHistoryUserId + "(我)";
+                        String messageStr = "";
+                        if(!StringUtils.isEmpty(sendHistoryUserId)) {
+                            if (sendHistoryUserId.equals(userId)) {
+                                sendHistoryUserId = sendHistoryUserId + "(我)";
+                            }
+                            messageStr = dateStr + ": " + sendHistoryUserId + ": " + sendHistory.getMessageContent();
+                        }else{
+                            messageStr =dateStr + ": " + "系统提示 " + sendHistory.getMessageContent();
                         }
-                        String messageStr = dateStr + ": " + sendHistoryUserId + ": " + sendHistory.getMessageContent();
                         historyStr += messageStr + SocketUtil.LINE_SEPARATOR;
                         messageInfo.setMessageMarkId(sendHistory.getMessageId());
                     }
@@ -380,7 +421,7 @@ public class ServerThread extends Thread {
                         roomUser.setRoomId(roomId);
                         roomUser.setUserId(userId);
                         roomUserService.saveRoomUser(roomUser);
-                        message += "用户" + userId + "成功加入；";
+                        outMessageToGroupRoom(roomId,"------ " + userId + " 成功加入群聊 "+ roomId + " ------");
                     }
                 }else{
                     message += "用户" + userId + "不存在!";
@@ -446,7 +487,7 @@ public class ServerThread extends Thread {
                                 roomUser1.setRoomId(roomId);
                                 roomUser1.setUserId(userId);
                                 roomUserService.saveRoomUser(roomUser1);
-                                message += "用户" + userId + "成功加入；";
+                                outMessageToGroupRoom(roomId,"------ " + userId + " 成功加入群聊 "+ roomId + " ------");
                             }
                         } else {
                             message += "用户" + userId + "不存在!";
@@ -470,6 +511,12 @@ public class ServerThread extends Thread {
         RoomUserService roomUserService = new RoomUserService();
         roomUserService.deleteRoomUser(roomId, userId);
         messageInfo.setMessageContent("提示：已退出群聊 " + roomId);
+        List<String> userIds = roomUserService.getUserIdsByRoomId(roomId);
+        if(!(userIds != null && userIds.size()>0)){
+            RoomService roomService = new RoomService();
+            roomService.deleteRoom(roomId);
+        }
         out(new Gson().toJson(messageInfo),socketId);
+        outMessageToGroupRoom(roomId,"------ " + userId + " 退出了群聊 " + roomId + " ------");
     }
 }
