@@ -90,10 +90,21 @@ public class SendThread extends Thread{
                 messageInfo = showUserHistory();
             }else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[13])){
                 messageInfo = showGroupRoomHistory();
+            }else if(SocketClient.ACTION.equals(SocketUtil.ACTIONS[14])){
+                if(SocketClient.ROOM_CHECK != null) {
+                    if (SocketClient.ROOM_CHECK.equals("true")) {
+                        messageInfo = leaveGroupRoom();
+                        SocketClient.ROOM_CHECK = null;
+                    } else {
+                        System.out.println("群聊聊天室不存在或当前用户不在此聊天群中");
+                        init();
+                        return null;
+                    }
+                }
             }
         }else {
             if(StringUtils.isEmpty(SocketClient.CHOOSE_NO)) {
-                System.out.println("选择序号(按#键加Enter返回到此选择)：" + SocketUtil.LINE_SEPARATOR + " 0." + SocketUtil.ACTIONS[0] + SocketUtil.LINE_SEPARATOR + " 1." + SocketUtil.ACTIONS[1] + SocketUtil.LINE_SEPARATOR + " 2." + SocketUtil.ACTIONS[2] + SocketUtil.LINE_SEPARATOR + " 3." + SocketUtil.ACTIONS[8] + SocketUtil.LINE_SEPARATOR + " 4." + SocketUtil.ACTIONS[9] + SocketUtil.LINE_SEPARATOR + " 5." + SocketUtil.ACTIONS[10] + SocketUtil.LINE_SEPARATOR + " 6." + SocketUtil.ACTIONS[12] + SocketUtil.LINE_SEPARATOR + " 7." + SocketUtil.ACTIONS[13]);
+                System.out.println("选择序号(按#键加Enter返回到此选择)：" + SocketUtil.LINE_SEPARATOR + " 0." + SocketUtil.ACTIONS[0] + SocketUtil.LINE_SEPARATOR + " 1." + SocketUtil.ACTIONS[1] + SocketUtil.LINE_SEPARATOR + " 2." + SocketUtil.ACTIONS[2] + SocketUtil.LINE_SEPARATOR + " 3." + SocketUtil.ACTIONS[8] + SocketUtil.LINE_SEPARATOR + " 4." + SocketUtil.ACTIONS[9] + SocketUtil.LINE_SEPARATOR + " 5." + SocketUtil.ACTIONS[10] + SocketUtil.LINE_SEPARATOR + " 6." + SocketUtil.ACTIONS[12] + SocketUtil.LINE_SEPARATOR + " 7." + SocketUtil.ACTIONS[13] + SocketUtil.LINE_SEPARATOR + " 8." + SocketUtil.ACTIONS[14]);
                 SocketClient.CHOOSE_NO = scanner.next();
             }
             switch (SocketClient.CHOOSE_NO) {
@@ -185,6 +196,18 @@ public class SendThread extends Thread{
                     }
                     //check room
                     messageInfo = checkRoom(roomId1);
+                    break;
+                case "8":
+                    SocketClient.ACTION = SocketUtil.ACTIONS[14];
+                    String roomId2 = null;
+                    System.out.println("请输入你要退出的聊天室id：");
+                    roomId2 = scanner.next();
+                    if (roomId2.equals("#")) {
+                        init();
+                        return null;
+                    }
+                    //check room
+                    messageInfo = checkRoom(roomId2);
                     break;
                 default:
                     System.out.println("没有该选项，请重新选择!");
@@ -310,5 +333,14 @@ public class SendThread extends Thread{
         SocketClient.CHOOSE_NO = null;
         SocketClient.ROOM_CHECK = null;
         SocketClient.USER_CHECK = null;
+    }
+
+    public MessageInfo leaveGroupRoom(){
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setAction(SocketClient.ACTION);
+        messageInfo.setRoomId(SocketClient.ROOM_ID);
+        messageInfo.setUserId(SocketClient.USER_ID);
+        SocketClient.ACTION = null;
+        return messageInfo;
     }
 }

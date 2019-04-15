@@ -125,4 +125,19 @@ public class RoomUserService {
         return result;
     }
 
+    public void deleteRoomUser(String roomId, String userId){
+        DataUtil<RoomUser> dataUtil = new DataUtil<RoomUser>();
+        List<RoomUser> roomUsers = dataUtil.readFromFile(ROOM_USER_FILE_PATH,RoomUser.class);
+        dataUtil.clearFile(ROOM_USER_FILE_PATH);
+        if(roomUsers.size()>0){
+            for (int i = 0; i < roomUsers.size(); i++) {
+                RoomUser roomUser = roomUsers.get(i);
+                if(!(roomUser.getRoomId().equals(roomId) && roomUser.getUserId().equals(userId))){
+                    dataUtil.writeToFile(ROOM_USER_FILE_PATH, roomUser);
+                }
+            }
+        }
+
+    }
+
 }

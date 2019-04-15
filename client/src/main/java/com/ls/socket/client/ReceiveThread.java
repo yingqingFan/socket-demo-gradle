@@ -92,7 +92,7 @@ public class ReceiveThread extends Thread{
                                 SocketClient.ROOM_ID = roomId;
                             }
                             SocketClient.IS_RESPONSE = "true";
-                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[12])) {
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[12])|| messageInfo.getAction().equals(SocketUtil.ACTIONS[14])) {
                             System.out.println(messageInfo.getMessageContent());
                             SocketClient.IS_RESPONSE = "true";
                         }else {

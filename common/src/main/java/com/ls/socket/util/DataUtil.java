@@ -37,4 +37,15 @@ public class DataUtil<T> {
         }
         return list;
     }
+
+    public void clearFile(String path){
+        List<T> list = new ArrayList<T>();
+        File file = FileUtil.createFileIfNotExist(path);
+        try(FileWriter fileWriter = new FileWriter(file)){
+            fileWriter.write("");
+            fileWriter.flush();
+        }catch (IOException e){
+            logger.error("clear file error!", e);
+        }
+    }
 }

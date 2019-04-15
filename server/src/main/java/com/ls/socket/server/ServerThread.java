@@ -121,6 +121,10 @@ public class ServerThread extends Thread {
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[12])){
                         addUsersToRoom(messageInfo);
                     }
+                    //退出群聊
+                    else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[14])){
+                        leaveGroupRoom(messageInfo);
+                    }
                     //心跳检测
                     else if(messageInfo.getAction().equals(SocketUtil.ACTIONS[4])){
                         heartBeat(messageInfo);
@@ -457,5 +461,15 @@ public class ServerThread extends Thread {
         }
         messageInfo.setMessageContent(message);
         out(new Gson().toJson(messageInfo), socketId);
+    }
+
+    //退出群聊
+    public void leaveGroupRoom(MessageInfo messageInfo){
+        String roomId = messageInfo.getRoomId();
+        String userId = messageInfo.getUserId();
+        RoomUserService roomUserService = new RoomUserService();
+        roomUserService.deleteRoomUser(roomId, userId);
+        messageInfo.setMessageContent("提示：已退出群聊 " + roomId);
+        out(new Gson().toJson(messageInfo),socketId);
     }
 }
