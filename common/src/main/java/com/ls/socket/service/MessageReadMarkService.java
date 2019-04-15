@@ -2,6 +2,7 @@ package com.ls.socket.service;
 
 import com.ls.socket.entity.MessageReadMark;
 import com.ls.socket.util.DataUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -23,6 +24,9 @@ public class MessageReadMarkService {
     }
 
     public void saveMessageReadMark(MessageReadMark messageReadMark){
+        if(StringUtils.isEmpty(messageReadMark.getMessageId())){
+            messageReadMark.setMessageId("0");
+        }
         new DataUtil<MessageReadMark>().writeToFile(MESSAGE_READ_MARK_FILE_PATH, messageReadMark);
     }
 }

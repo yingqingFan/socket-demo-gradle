@@ -127,20 +127,24 @@ public class ServerThread extends Thread {
                     }
                 }
             }
-        }catch (IOException e) {
+        }catch (Exception e) {
             log.error("error",e);
-            SocketServer.socketMap.remove(socketId);
             String userId = SocketServer.socketUserMap.get(socketId);
-            SocketServer.socketUserMap.remove(socketId);
             //bindClient失败时socket没有对应userId，无需显示下线通知
             if(!StringUtils.isEmpty(userId)) {
-                SocketServer.userSocketMap.remove(userId);
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setMessageContent("服务器发生异常，当前用户断开连接");
+                messageInfo.setAction(SocketUtil.ACTIONS[6]);
+                out(new Gson().toJson(messageInfo),socketId);
                 String outS = "提示： " + userId + " 已下线";
                 System.out.println("提示： " + userId + " 断开连接");
-                MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setMessageContent(outS);
+                messageInfo.setAction(null);
                 outOthers(new Gson().toJson(messageInfo));
+                SocketServer.userSocketMap.remove(userId);
             }
+            SocketServer.socketMap.remove(socketId);
+            SocketServer.socketUserMap.remove(socketId);
         }
     }
 

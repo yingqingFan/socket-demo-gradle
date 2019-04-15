@@ -29,72 +29,76 @@ public class ReceiveThread extends Thread{
                 String line = null;
                 while (((line = bufferedReader.readLine()) != null)) {
                     MessageInfo messageInfo = new Gson().fromJson(line, MessageInfo.class);
-                    if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[0])) {
-                        if (StringUtils.isEmpty(SocketClient.ROOM_ID)) {
-                            System.out.println(messageInfo.getMessageContent());
-                        } else {
-                            if(messageInfo.getRoomId().equals(SocketClient.ROOM_ID)){
+                    if(messageInfo.getAction() != null ) {
+                        if (messageInfo.getAction().equals(SocketUtil.ACTIONS[0])) {
+                            if (StringUtils.isEmpty(SocketClient.ROOM_ID)) {
                                 System.out.println(messageInfo.getMessageContent());
-                                String messageId = messageInfo.getMessageId();
-                                MessageReadMark messageReadMark = new MessageReadMark();
-                                messageReadMark.setMessageId(messageId);
-                                messageReadMark.setRoomId(SocketClient.ROOM_ID);
-                                new MessageReadMarkService().saveMessageReadMark(messageReadMark);
+                            } else {
+                                if (messageInfo.getRoomId().equals(SocketClient.ROOM_ID)) {
+                                    System.out.println(messageInfo.getMessageContent());
+                                    String messageId = messageInfo.getMessageId();
+                                    MessageReadMark messageReadMark = new MessageReadMark();
+                                    messageReadMark.setMessageId(messageId);
+                                    messageReadMark.setRoomId(SocketClient.ROOM_ID);
+                                    new MessageReadMarkService().saveMessageReadMark(messageReadMark);
+                                }
                             }
-                        }
-                    }else if (messageInfo.getAction() != null && (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[13]))){
-                        SocketClient.ACTION = null;
-                        System.out.println(messageInfo.getMessageContent());
-                        saveMessageReadMarkByMessageInfo(messageInfo);
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[2])){
-                        SocketClient.ACTION = null;
-                        System.out.println(messageInfo.getMessageContent());
-                        SocketClient.CHOOSE_NO = "0";
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[5])){
-                        if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[1]) || messageInfo.getAction().equals(SocketUtil.ACTIONS[13])) {
+                            SocketClient.ACTION = null;
+                            System.out.println(messageInfo.getMessageContent());
+                            saveMessageReadMarkByMessageInfo(messageInfo);
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[2])) {
+                            SocketClient.ACTION = null;
+                            System.out.println(messageInfo.getMessageContent());
+                            SocketClient.CHOOSE_NO = "0";
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[5])) {
+                            if (!StringUtils.isEmpty(messageInfo.getMessageContent())) {
+                                System.out.println(messageInfo.getMessageContent());
+                            }
+                            String roomId = messageInfo.getRoomId();
+                            if (StringUtils.isEmpty(roomId)) {
+                                SocketClient.USER_CHECK = "false";
+                            } else {
+                                SocketClient.USER_CHECK = "true";
+                                SocketClient.ROOM_ID = roomId;
+                            }
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[6])) {
+                            log.error(messageInfo.getMessageContent());
+                            System.exit(0);
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[7])) {
+                            System.out.println(messageInfo.getMessageContent());
+                            saveMessageReadMarkByMessageInfo(messageInfo);
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[8])) {
+                            System.out.println(messageInfo.getMessageContent());
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[9])) {
+                            SocketClient.ACTION = null;
+                            System.out.println(messageInfo.getMessageContent());
+                            SocketClient.CHOOSE_NO = "5";
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[11])) {
+                            if (!StringUtils.isEmpty(messageInfo.getMessageContent())) {
+                                System.out.println(messageInfo.getMessageContent());
+                            }
+                            String roomId = messageInfo.getRoomId();
+                            if (StringUtils.isEmpty(roomId)) {
+                                SocketClient.ROOM_CHECK = "false";
+                            } else {
+                                SocketClient.ROOM_CHECK = "true";
+                                SocketClient.ROOM_ID = roomId;
+                            }
+                            SocketClient.IS_RESPONSE = "true";
+                        } else if (messageInfo.getAction().equals(SocketUtil.ACTIONS[12])) {
+                            System.out.println(messageInfo.getMessageContent());
+                            SocketClient.IS_RESPONSE = "true";
+                        }else {
                             System.out.println(messageInfo.getMessageContent());
                         }
-                        String roomId = messageInfo.getRoomId();
-                        if(StringUtils.isEmpty(roomId)){
-                            SocketClient.USER_CHECK = "false";
-                        }else{
-                            SocketClient.USER_CHECK = "true";
-                            SocketClient.ROOM_ID = roomId;
-                        }
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[6])){
-                        log.error(messageInfo.getMessageContent());
-                        System.exit(0);
-                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[7])){
-                        System.out.println(messageInfo.getMessageContent());
-                        saveMessageReadMarkByMessageInfo(messageInfo);
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[8])){
-                        System.out.println(messageInfo.getMessageContent());
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if (messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[9])){
-                        SocketClient.ACTION = null;
-                        System.out.println(messageInfo.getMessageContent());
-                        SocketClient.CHOOSE_NO = "5";
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[11])){
-                        if(!StringUtils.isEmpty(messageInfo.getMessageContent())) {
-                            System.out.println(messageInfo.getMessageContent());
-                        }
-                        String roomId = messageInfo.getRoomId();
-                        if(StringUtils.isEmpty(roomId)){
-                            SocketClient.ROOM_CHECK = "false";
-                        }else{
-                            SocketClient.ROOM_CHECK = "true";
-                            SocketClient.ROOM_ID = roomId;
-                        }
-                        SocketClient.IS_RESPONSE = "true";
-                    }else if(messageInfo.getAction() != null && messageInfo.getAction().equals(SocketUtil.ACTIONS[12])){
-                        System.out.println(messageInfo.getMessageContent());
-                        SocketClient.IS_RESPONSE = "true";
-                    } else {
+                    }else {
                         System.out.println(messageInfo.getMessageContent());
                     }
                 }
